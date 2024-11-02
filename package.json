@@ -1,0 +1,27 @@
+{
+  "name": "com.misaki.graph-view",
+  "version": "1.0.0",
+  "displayName": "Graph View",
+  "description": "A graph editor based on gaph view api",
+  "keywords": [
+    "Graph",
+    "Editor",
+    "UI"
+  ],
+  "author": {
+    "name": "Misaki",
+    "email": "misaki_39@outlook.com",
+    "url": "https://github.com/misakieku"
+  },
+  "dependencies": {
+    "com.unity.burst": "1.8.0",
+    "com.unity.mathematics": "1.2.5"
+  },
+  "samples": [
+    {
+        "displayName": "Sample Scene",
+        "description": "Contains sample scene for how to use the voxel wind system",
+        "path": "Samples~"
+    }
+]
+}

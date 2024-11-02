@@ -1,0 +1,17 @@
+{
+    "name": "GraphView.Sample",
+    "rootNamespace": "Misaki.GraphView.Sample",
+    "references": [
+        "GUID:f9745e3c5d586134288023f609b080e2",
+        "GUID:533d7c0252a224f4b91c72a79c31c026"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

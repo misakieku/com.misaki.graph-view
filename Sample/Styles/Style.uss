@@ -1,0 +1,22 @@
+GridBackground
+{
+    --grid-background-color : rgb(32, 32, 32);
+    --line-color : rgba(193, 196, 192, 0.1);
+    --thick-line-color : rgba(193, 196, 192, 0.2);
+    --spacing : 15;
+}
+
+.graphElement.node.math VisualElement#title
+{
+    background-color : rgba(64, 96, 128, 0.8);
+}
+
+.graphElement.node.input VisualElement#title
+{
+    background-color : rgba(128, 64, 64, 0.8);
+}
+
+.graphElement.node.output VisualElement#title
+{
+    background-color : rgba(64, 128, 70, 0.8);
+}

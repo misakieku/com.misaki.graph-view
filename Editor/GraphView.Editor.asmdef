@@ -1,0 +1,18 @@
+{
+    "name": "GraphView.Editor",
+    "rootNamespace": "Misaki.GraphView.Editor",
+    "references": [
+        "GUID:f9745e3c5d586134288023f609b080e2"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
