@@ -166,7 +166,6 @@ namespace Misaki.GraphView.Editor
             _graphObject.SetTransform(viewTransform);
             
             EditorUtility.SetDirty(_graphObject);
-            _graphViewConfig.serializedObject.ApplyModifiedProperties();
             _graphViewConfig.serializedObject.Update();
             
             return graphViewChange;
@@ -238,7 +237,7 @@ namespace Misaki.GraphView.Editor
             else
             {
                 type ??= typeof(EditorNodeView);
-                nodeView = Activator.CreateInstance(type, baseNode, _graphViewConfig.serializedObject, _graphViewConfig.portColorManager) as EditorNodeView;
+                nodeView = Activator.CreateInstance(type, baseNode, _graphViewConfig.serializedObject, _graphViewConfig.portColorManager, _graphObject.Logger) as EditorNodeView;
             }
 
 

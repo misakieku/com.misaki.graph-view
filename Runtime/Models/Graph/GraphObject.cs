@@ -24,7 +24,9 @@ namespace Misaki.GraphView
         public Vector3 graphPosition;
         public Vector3 graphScale = Vector3.one;
         
+        public virtual IGraphProcessor GraphProcessor { get; } = null;
         public virtual IValueConverterManager ValueConverterManager { get; } = null;
+        public virtual ILogger Logger { get; } = null;
 
         private void OnEnable()
         {
@@ -108,6 +110,15 @@ namespace Misaki.GraphView
             graphScale = transform.scale;
         }
 
-        public abstract void Execute();
+        public virtual void Execute()
+        {
+            if (GraphProcessor == null)
+            {
+                return;
+            }
+            
+            GraphProcessor.UpdateComputeOrder();
+            GraphProcessor.Execute(Nodes);
+        }
     }
 }

@@ -18,9 +18,11 @@ namespace Misaki.GraphView
             _property = property;
         }
         
-        protected override void OnExecute()
+        protected override bool OnExecute()
         {
             value = _property.Value;
+            
+            return true;
         }
     }
 }

@@ -18,6 +18,10 @@ namespace Misaki.GraphView
 
         public GraphObject GraphObject => _graphObject;
         public string Id => _id;
+        
+        public Action OnExecutionCompleted;
+        public Action<BaseNode> OnExecutionFailed;
+        public Action OnExecuteFlagCleared;
 
         /// <summary>
         /// Initialize the node with the graph object, this method is called when the node is added to the graph.
@@ -75,9 +79,9 @@ namespace Misaki.GraphView
         /// <summary>
         /// Get the slot by the index and direction.
         /// </summary>
-        /// <param name="index"></param>
-        /// <param name="direction"></param>
-        /// <returns></returns>
+        /// <param name="index"> Index of the slot</param>
+        /// <param name="direction"> Direction of the slot </param>
+        /// <returns> <see cref="Slot"/> The slot that matches the index and direction </returns>
         public Slot GetSlot(int index, SlotDirection direction)
         {
             return direction switch
@@ -117,10 +121,22 @@ namespace Misaki.GraphView
             }
             
             PullData();
-            OnExecute();
+
+            if (!_graphObject.GraphProcessor.IsRunning)
+            {
+                return;
+            }
+            
+            if (!OnExecute())
+            {
+                _graphObject.GraphProcessor.Break();
+                OnExecutionFailed?.Invoke(this);
+                return;
+            }
             PushData();
             
             _isExecuted = true;
+            OnExecutionCompleted?.Invoke();
         }
 
         private void PullData()
@@ -128,10 +144,13 @@ namespace Misaki.GraphView
             foreach (var input in Inputs)
             {
                 var property = GetType().GetField(input.slotData.slotName, ConstResource.NODE_FIELD_BINDING_FLAGS);
-                if (property == null) continue;
-
+                if (property == null)
+                {
+                    continue;
+                }
+                
                 OnPullData(input);
-
+                
                 if (input.LinkedSlotData.Count == 0)
                 {
                     continue;
@@ -150,7 +169,10 @@ namespace Misaki.GraphView
             foreach (var output in Outputs)
             {
                 var property = GetType().GetField(output.slotData.slotName, ConstResource.NODE_FIELD_BINDING_FLAGS);
-                if (property == null) continue;
+                if (property == null)
+                {
+                    continue;
+                }
 
                 OnPushData(output);
 
@@ -184,11 +206,13 @@ namespace Misaki.GraphView
         public void ClearExecuteFlag()
         {
             _isExecuted = false;
+            OnExecuteFlagCleared?.Invoke();
         }
 
         /// <summary>
-        ///     The execution logic of the node.
+        /// The execution logic of the node.
         /// </summary>
-        protected abstract void OnExecute();
+        /// <returns> <see cref="bool"/> Return true if the execution is success, otherwise false </returns>
+        protected abstract bool OnExecute();
     }
 }

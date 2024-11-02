@@ -8,9 +8,11 @@ namespace Misaki.GraphView.Sample
         [NodeInput]
         private float _input;
         
-        protected override void OnExecute()
+        protected override bool OnExecute()
         {
-            Debug.Log(_input);
+            GraphObject.Logger.LogInfo(this, $"{_input}");
+
+            return true;
         }
     }
 }

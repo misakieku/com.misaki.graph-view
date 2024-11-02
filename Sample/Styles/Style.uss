@@ -6,6 +6,19 @@ GridBackground
     --spacing : 15;
 }
 
+EditorNodeView.node-execution-failed VisualElement#node-border
+{
+    border-bottom-width: 1px;
+    border-top-width: 1px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    
+    border-bottom-color: red;
+    border-top-color: red;
+    border-left-color: red;
+    border-right-color: red;
+}
+
 .graphElement.node.math VisualElement#title
 {
     background-color : rgba(64, 96, 128, 0.8);

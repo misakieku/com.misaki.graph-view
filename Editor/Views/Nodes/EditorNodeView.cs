@@ -15,11 +15,14 @@ namespace Misaki.GraphView.Editor
         private readonly BaseNode _dataNode;
         private readonly Type _nodeType;
         private readonly NodeInfoAttribute _nodeInfo;
+        
         private readonly List<Port> _inputPorts = new ();
         private readonly List<Port> _outputPorts = new ();
         
         private readonly IPortColorManager _portColorManager;
         private readonly SerializedObject _serializedObject;
+        
+        private readonly VisualElement _logContainer = new();
         
         public BaseNode DataNode => _dataNode;
         public List<Port>  InputPorts => _inputPorts;
@@ -29,8 +32,13 @@ namespace Misaki.GraphView.Editor
 
         public string InspectorName => _nodeInfo.Name ?? _nodeType.Name;
 
-        public EditorNodeView(BaseNode dataNode, SerializedObject serializedObject, IPortColorManager portColorManager)
+        public EditorNodeView(BaseNode dataNode, SerializedObject serializedObject, IPortColorManager portColorManager, ILogger logger)
         {
+            if (dataNode == null)
+            {
+                return;
+            }
+            
             _dataNode = dataNode;
             _portColorManager = portColorManager;
             _serializedObject = serializedObject;
@@ -87,6 +95,70 @@ namespace Misaki.GraphView.Editor
                     }
                 }
             }
+            
+            _logContainer.style.position = Position.Absolute;
+            _logContainer.style.top = 8;
+            Add(_logContainer);
+
+            _dataNode.OnExecuteFlagCleared += OnExecuteFlagCleared;
+            _dataNode.OnExecutionFailed += (_) => AddToClassList("node-execution-failed");
+            if (logger != null)
+            {
+                logger.OnLog += CreateLogElement;
+            }
+        }
+
+        private void CreateLogElement(BaseNode node, string message, LogType type)
+        {
+            if (node.Id != _dataNode.Id)
+            {
+                return;
+            }
+            
+            _logContainer.style.left = layout.width;
+            
+            var logIcon = new Image()
+            {
+                image = type switch
+                {
+                    LogType.Error => EditorGUIUtility.IconContent("console.erroricon.sml").image,
+                    LogType.Warning => EditorGUIUtility.IconContent("console.warnicon.sml").image,
+                    _ => EditorGUIUtility.IconContent("console.infoicon.sml").image
+                },
+                tooltip = message,
+                style =
+                {
+                    width = 24,
+                    height = 24,
+                    
+                    borderBottomLeftRadius = 4,
+                    borderTopRightRadius = 4,
+                    borderTopLeftRadius = 4,
+                    borderBottomRightRadius = 4,
+                    
+                    flexDirection = FlexDirection.Row,
+                    alignItems = Align.Center,
+                    paddingBottom = 1,
+                    paddingTop = 1,
+                    paddingLeft = 3,
+                    paddingRight = 3,
+                    position = Position.Absolute,
+                    backgroundColor = type switch
+                    {
+                        LogType.Error => new Color(0.4f, 0.2f, 0.2f),
+                        LogType.Warning => new Color(0.4f, 0.35f, 0.2f),
+                        _ => new Color(0.4f, 0.4f, 0.4f)
+                    }
+                }
+            };
+            
+            _logContainer.Add(logIcon);
+        }
+
+        private void OnExecuteFlagCleared()
+        {
+            _logContainer.Clear();
+            RemoveFromClassList("node-execution-failed");
         }
 
         private void CreateInputPort(Slot slot)

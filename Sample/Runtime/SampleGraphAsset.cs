@@ -5,17 +5,10 @@ namespace Misaki.GraphView.Sample
     [CreateAssetMenu(fileName = "GraphAsset", menuName = "Scriptable Objects/GraphAsset")]
     public class SampleGraphAsset : GraphObject
     {
-        public override void Execute()
-        {
-            Nodes.ClearAllExecuteFlag();
-            
-            foreach (var node in Nodes)
-            {
-                if (node is OutputNode outputNode)
-                {
-                    outputNode.Execute();
-                }
-            }
-        }
+        private readonly Logger _logger = new Logger();
+        private readonly BackTraceGraphProcessor _processor = new BackTraceGraphProcessor();
+
+        public override ILogger Logger => _logger;
+        public override IGraphProcessor GraphProcessor => _processor;
     }
 }

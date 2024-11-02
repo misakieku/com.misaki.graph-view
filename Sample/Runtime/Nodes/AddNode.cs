@@ -22,9 +22,11 @@ namespace Misaki.GraphView.Sample
         [NodeOutput] 
         private float _result;
 
-        protected override void OnExecute()
+        protected override bool OnExecute()
         {
             _result = a + b;
+
+            return true;
         }
     }
 }
