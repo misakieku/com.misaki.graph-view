@@ -50,12 +50,12 @@ namespace Misaki.GraphView
         public ReadOnlyCollection<SlotData> LinkedSlotData => _linkedSlotData.AsReadOnly();
 
         [SerializeReference]
-        public BaseNode owner;
+        public SlotContainerNode owner;
         public SlotData slotData;
         
         public object value;
         
-        public Slot(BaseNode owner, SlotData slotData)
+        public Slot(SlotContainerNode owner, SlotData slotData)
         {
             this.owner = owner;
             this.slotData = slotData;

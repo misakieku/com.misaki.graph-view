@@ -13,7 +13,7 @@ namespace Misaki.GraphView.Sample
         {
         }
 
-        public void Execute(ReadOnlyCollection<BaseNode> nodes)
+        public void Execute(ReadOnlyCollection<SlotContainerNode> nodes)
         {
             _isRunning = true;
             nodes.ClearAllExecuteFlag();

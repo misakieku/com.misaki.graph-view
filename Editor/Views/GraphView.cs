@@ -78,6 +78,29 @@ namespace Misaki.GraphView.Editor
             graphViewChanged += OnGraphViewChanged;
         }
 
+        public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
+        {
+            base.BuildContextualMenu(evt);
+            var mousePosition = (evt.currentTarget as VisualElement).ChangeCoordinatesTo(contentViewContainer, evt.localMousePosition);
+            
+            if (selection.Count == 0)
+            {
+                evt.menu.InsertAction(1, "Create Sticky Note", e =>
+                {
+                    var stickyNote = new StickyNoteData
+                    {
+                        title = "Sticky Note",
+                        contents = "Contents",
+                        theme = StickyNoteTheme.Classic,
+                        fontSize = StickyNoteFontSize.Medium,
+                        position = new Rect(mousePosition, new Vector2(200, 200))
+                    };
+                    
+                    AddStickyNote(stickyNote);
+                }, DropdownMenuAction.AlwaysEnabled);
+            }
+        }
+
         private void InitializeAssetElements()
         {
             var searchProvider = ScriptableObject.CreateInstance<NodeSearchProvider>();
@@ -88,12 +111,19 @@ namespace Misaki.GraphView.Editor
                 SearchWindow.Open(new SearchWindowContext(context.screenMousePosition), searchProvider);
             };
 
-            if (_graphObject.Nodes.Count > 0)
+            foreach (var node in _graphObject.Nodes)
             {
-                foreach (var node in _graphObject.Nodes) AddNodeView(node);
+                AddNodeView(node);
+            }
 
-                foreach (var connection in _graphObject.Connections)
-                    AddConnectionView(connection.InputSlotData, connection.OutputSlotData);
+            foreach (var noteData in _graphObject.StickyNotes)
+            {
+                AddStickyNoteView(noteData);
+            }
+            
+            foreach (var connection in _graphObject.Connections)
+            {
+                AddConnectionView(connection);
             }
             
             RegisterCallback<DragPerformEvent>(OnDragPerform);
@@ -110,9 +140,14 @@ namespace Misaki.GraphView.Editor
 
                 for (var i = removedElements.Count - 1; i >= 0; i--)
                 {
-                    if (removedElements[i] is Node { userData: BaseNode node })
+                    if (removedElements[i] is Node { userData: SlotContainerNode node })
                     {
                         RemoveNode(node);
+                    }
+
+                    if (removedElements[i] is StickyNote {userData : StickyNoteData stickyNote})
+                    {
+                        RemoveStickyNote(stickyNote);
                     }
 
                     if (removedElements[i] is Edge edge)
@@ -133,19 +168,16 @@ namespace Misaki.GraphView.Editor
                 }
             }
 
-            if (graphViewChange.movedElements != null)
-            {
-                var movedElements = graphViewChange.movedElements;
-                Undo.RecordObject(_graphObject, $"Move {movedElements.FirstOrDefault()?.GetType().Name}");
-
-                foreach (var element in graphViewChange.movedElements)
-                {
-                    if (element is Node node)
-                    {
-                        node.SetPosition(node.GetPosition());
-                    }
-                }
-            }
+            // if (graphViewChange.movedElements != null)
+            // {
+            //     var movedElements = graphViewChange.movedElements;
+            //     Undo.RecordObject(_graphObject, $"Move {movedElements.FirstOrDefault()?.GetType().Name}");
+            //
+            //     foreach (var element in graphViewChange.movedElements)
+            //     {
+            //         element.SetPosition(element.GetPosition());
+            //     }
+            // }
 
             if (graphViewChange.edgesToCreate != null)
             {
@@ -163,10 +195,10 @@ namespace Misaki.GraphView.Editor
                     }
             }
 
-            _graphObject.SetTransform(viewTransform);
+            _graphObject.SetGraphTransform(viewTransform);
             
-            EditorUtility.SetDirty(_graphObject);
             _graphViewConfig.serializedObject.Update();
+            EditorUtility.SetDirty(_graphObject);
             
             return graphViewChange;
         }
@@ -210,24 +242,24 @@ namespace Misaki.GraphView.Editor
             }
         }
 
-        public void AddNode(BaseNode baseNode)
+        public void AddNode(SlotContainerNode slotContainerNode)
         {
-            Undo.RecordObject(_graphObject, $"Add {baseNode.GetType().Name}");
+            Undo.RecordObject(_graphObject, $"Add {slotContainerNode.GetType().Name}");
 
-            _graphObject.AddNode(baseNode);
-            AddNodeView(baseNode);
+            _graphObject.AddNode(slotContainerNode);
+            AddNodeView(slotContainerNode);
 
             EditorUtility.SetDirty(_graphObject);
         }
 
-        public virtual void AddNodeView(BaseNode baseNode)
+        public virtual void AddNodeView(SlotContainerNode slotContainerNode)
         {
             Node nodeView;
             var types = TypeCache.GetTypesWithAttribute<CustomInspectorAttribute>();
             var type = types.FirstOrDefault(t =>
-                t.GetCustomAttribute<CustomInspectorAttribute>().InspectorType == baseNode.GetType());
+                t.GetCustomAttribute<CustomInspectorAttribute>().InspectorType == slotContainerNode.GetType());
 
-            if (baseNode is PropertyInputNode propertyInputNode)
+            if (slotContainerNode is PropertyInputNode propertyInputNode)
             {
                 // type ??= typeof(PropertyInputNodeView);
                 // var slot = propertyInputNode.GetSlot(0, SlotDirection.Output);
@@ -237,7 +269,7 @@ namespace Misaki.GraphView.Editor
             else
             {
                 type ??= typeof(EditorNodeView);
-                nodeView = Activator.CreateInstance(type, baseNode, _graphViewConfig.serializedObject, _graphViewConfig.portColorManager, _graphObject.Logger) as EditorNodeView;
+                nodeView = Activator.CreateInstance(type, slotContainerNode, _graphViewConfig.serializedObject, _graphViewConfig.portColorManager, _graphObject.Logger) as EditorNodeView;
             }
 
 
@@ -246,7 +278,7 @@ namespace Misaki.GraphView.Editor
                 return;
             }
 
-            nodeView.SetPosition(baseNode.position);
+            nodeView.SetPosition(slotContainerNode.position);
 
             if (nodeView is IInspectable inspectable)
             {
@@ -254,22 +286,22 @@ namespace Misaki.GraphView.Editor
             }
 
             AddElement(nodeView);
-            _nodeViewsMap.Add(baseNode.Id, nodeView);
+            _nodeViewsMap.Add(slotContainerNode.Id, nodeView);
         }
 
-        private void RemoveNode(BaseNode baseNode)
+        private void RemoveNode(SlotContainerNode slotContainerNode)
         {
-            Undo.RecordObject(_graphObject, $"Remove {baseNode.GetType().Name}");
+            Undo.RecordObject(_graphObject, $"Remove {slotContainerNode.GetType().Name}");
 
-            _graphObject.RemoveNode(baseNode);
-            RemoveNodeView(baseNode);
+            _graphObject.RemoveNode(slotContainerNode);
+            RemoveNodeView(slotContainerNode);
 
             EditorUtility.SetDirty(_graphObject);
         }
 
-        private void RemoveNodeView(BaseNode baseNode)
+        private void RemoveNodeView(SlotContainerNode slotContainerNode)
         {
-            if (_nodeViewsMap.Remove(baseNode.Id, out var nodeView))
+            if (_nodeViewsMap.Remove(slotContainerNode.Id, out var nodeView))
             {
                 RemoveElement(nodeView);
 
@@ -278,6 +310,82 @@ namespace Misaki.GraphView.Editor
                     inspectable.OnItemSelected -= ChangeInspectorView;
                 }
             }
+        }
+        
+        public void AddStickyNote(StickyNoteData stickyNote)
+        {
+            Undo.RecordObject(_graphObject, $"Add {stickyNote.title}");
+            
+            _graphObject.AddStickyNote(stickyNote);
+            
+            AddStickyNoteView(stickyNote);
+        }
+        
+        private void AddStickyNoteView(StickyNoteData stickyNote)
+        {
+            var stickyNoteView = new StickyNoteView(stickyNote);
+            stickyNoteView.SetPosition(stickyNote.position);
+            AddElement(stickyNoteView);
+        }
+        
+        public void RemoveStickyNote(StickyNoteData stickyNote)
+        {
+            Undo.RecordObject(_graphObject, $"Remove {stickyNote.title}");
+            
+            _graphObject.RemoveStickyNote(stickyNote);
+            
+            RemoveStickyNoteView(stickyNote);
+        }
+        
+        private void RemoveStickyNoteView(StickyNoteData stickyNote)
+        {
+            // var stickyNoteView = GetStickyNoteView(stickyNote);
+            // if (stickyNoteView != null)
+            // {
+            //     RemoveElement(stickyNoteView);
+            // }
+        }
+
+        public void AddConnection(SlotConnection connection)
+        {
+            Undo.RecordObject(_graphObject, $"Add {connection.GetType().Name}");
+
+            _graphObject.AddConnection(connection);
+
+            EditorUtility.SetDirty(_graphObject);
+        }
+
+        private void RemoveConnection(SlotConnection connection)
+        {
+            Undo.RecordObject(_graphObject, $"Remove {connection.GetType().Name}");
+
+            _graphObject.RemoveConnection(connection);
+
+            EditorUtility.SetDirty(_graphObject);
+        }
+
+        private void AddConnectionView(SlotConnection connection)
+        {
+            var inputSlotData = connection.InputSlotData;
+            var outputSlotData = connection.OutputSlotData;
+
+            if (!_nodeViewsMap.TryGetValue(inputSlotData.nodeID, out var inputNodeView) ||
+                !_nodeViewsMap.TryGetValue(outputSlotData.nodeID, out var outputNodeView))
+            {
+                return;
+            }
+            
+            if (inputNodeView is not IPortContainer inputPortContainer || outputNodeView is not IPortContainer outputPortContainer)
+            {
+                return;
+            }
+                
+            var inputPort = inputPortContainer.InputPorts[inputSlotData.slotIndex];
+            var outputPort = outputPortContainer.OutputPorts[outputSlotData.slotIndex];
+
+            var edge = inputPort.ConnectTo(outputPort);
+            AddElement(edge);
+            _slotConnections.Add(edge, connection);
         }
         
         public void ToggleBlackboardViewVisibility()
@@ -312,43 +420,6 @@ namespace Misaki.GraphView.Editor
             _graphInspectorView.style.visibility = _graphInspectorView.style.visibility == Visibility.Hidden
                 ? Visibility.Visible
                 : Visibility.Hidden;
-        }
-
-        public void AddConnection(SlotConnection connection)
-        {
-            Undo.RecordObject(_graphObject, $"Add {connection.GetType().Name}");
-
-            _graphObject.AddConnection(connection);
-
-            EditorUtility.SetDirty(_graphObject);
-        }
-
-        private void RemoveConnection(SlotConnection connection)
-        {
-            Undo.RecordObject(_graphObject, $"Remove {connection.GetType().Name}");
-
-            _graphObject.RemoveConnection(connection);
-
-            EditorUtility.SetDirty(_graphObject);
-        }
-
-        private void AddConnectionView(SlotData a, SlotData b)
-        {
-            if (_nodeViewsMap.TryGetValue(a.nodeID, out var inputNodeView) &&
-                _nodeViewsMap.TryGetValue(b.nodeID, out var outputNodeView))
-            {
-                if (inputNodeView is not IPortContainer inputPortContainer || outputNodeView is not IPortContainer outputPortContainer)
-                {
-                    return;
-                }
-                
-                var inputPort = inputPortContainer.InputPorts[a.slotIndex];
-                var outputPort = outputPortContainer.OutputPorts[b.slotIndex];
-
-                var edge = inputPort.ConnectTo(outputPort);
-                AddElement(edge);
-                _slotConnections.Add(edge, new SlotConnection(a, b));
-            }
         }
     }
 }

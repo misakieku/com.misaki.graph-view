@@ -12,7 +12,7 @@ namespace Misaki.GraphView.Editor
 {
     public class EditorNodeView : Node, IInspectable, IPortContainer
     {
-        private readonly BaseNode _dataNode;
+        private readonly SlotContainerNode _dataNode;
         private readonly Type _nodeType;
         private readonly NodeInfoAttribute _nodeInfo;
         
@@ -24,7 +24,7 @@ namespace Misaki.GraphView.Editor
         
         private readonly VisualElement _logContainer = new();
         
-        public BaseNode DataNode => _dataNode;
+        public SlotContainerNode DataNode => _dataNode;
         public List<Port>  InputPorts => _inputPorts;
         public List<Port>  OutputPorts => _outputPorts;
         
@@ -32,7 +32,7 @@ namespace Misaki.GraphView.Editor
 
         public string InspectorName => _nodeInfo.Name ?? _nodeType.Name;
 
-        public EditorNodeView(BaseNode dataNode, SerializedObject serializedObject, IPortColorManager portColorManager, ILogger logger)
+        public EditorNodeView(SlotContainerNode dataNode, SerializedObject serializedObject, IPortColorManager portColorManager, ILogger logger)
         {
             if (dataNode == null)
             {
@@ -59,7 +59,7 @@ namespace Misaki.GraphView.Editor
                 AddToClassList(depth.ToLower().Replace(" ", "-"));
             }
             
-            var inputs = _nodeType.GetProperty(nameof(BaseNode.Inputs));
+            var inputs = _nodeType.GetProperty(nameof(SlotContainerNode.Inputs));
 
             if (inputs != null)
             {
@@ -78,7 +78,7 @@ namespace Misaki.GraphView.Editor
                 }
             }
 
-            var outputs = _nodeType.GetProperty(nameof(BaseNode.Outputs));
+            var outputs = _nodeType.GetProperty(nameof(SlotContainerNode.Outputs));
 
             if (outputs != null)
             {
@@ -108,7 +108,7 @@ namespace Misaki.GraphView.Editor
             }
         }
 
-        private void CreateLogElement(BaseNode node, string message, LogType type)
+        private void CreateLogElement(SlotContainerNode node, string message, LogType type)
         {
             if (node.Id != _dataNode.Id)
             {
@@ -236,9 +236,9 @@ namespace Misaki.GraphView.Editor
                 return root;
             }
 
+            var i = graphObject.Nodes.IndexOf(_dataNode);
             foreach (var field in fields)
             {
-                var i = graphObject.Nodes.IndexOf(_dataNode);
                 var serializedProperty = _serializedObject.FindProperty("_nodes")?.GetArrayElementAtIndex(i)?.FindPropertyRelative(field.Name);
                 
                 if (serializedProperty == null)

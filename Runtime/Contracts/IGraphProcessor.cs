@@ -9,7 +9,7 @@ namespace Misaki.GraphView
         
         public void UpdateComputeOrder();
         
-        public void Execute(ReadOnlyCollection<BaseNode> nodes);
+        public void Execute(ReadOnlyCollection<SlotContainerNode> nodes);
         
         public void Break();
     }

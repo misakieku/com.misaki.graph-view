@@ -8,6 +8,8 @@ namespace Misaki.GraphView.Sample.Editor
 {
     public class SampleGraphEditor : EditorWindow
     {
+        private const string Icon_Path = "Packages/com.misaki.graph-view/Sample/Icon/icons8-workflow-96.png";
+        
         [SerializeField]
         private StyleSheet _styleSheet;
         
@@ -21,15 +23,15 @@ namespace Misaki.GraphView.Sample.Editor
         private static void Open()
         {
             var window = CreateWindow<SampleGraphEditor>(typeof(SceneView));
-            window.titleContent = new GUIContent("Sample Graph Editor");
+            window.titleContent = new GUIContent("Sample Graph Editor", EditorGUIUtility.IconContent(Icon_Path).image);
         }
         
         public static void Open(GraphObject asset)
         {
             var window = GetWindow<SampleGraphEditor>(typeof(SceneView));
+            window.titleContent = new GUIContent(asset.name, EditorGUIUtility.IconContent(Icon_Path).image);
             window.Clear();
             window.LoadAsset(asset);
-            window.titleContent = new GUIContent(asset.name);
             window.DrawGraph();
             window.Focus();
         }

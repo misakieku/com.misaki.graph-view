@@ -48,8 +48,8 @@ namespace Misaki.GraphView.Editor
             _searchContextElements.Clear();
 
             var types = string.IsNullOrEmpty(_owner.GraphViewConfig.searchNamespace) ? 
-                TypeCache.GetTypesDerivedFrom<BaseNode>().ToArray() : 
-                TypeCache.GetTypesDerivedFrom<BaseNode>().Where(t => !string.IsNullOrEmpty(t.Namespace) && t.Namespace.StartsWith(_owner.GraphViewConfig.searchNamespace)).ToArray();
+                TypeCache.GetTypesDerivedFrom<SlotContainerNode>().ToArray() : 
+                TypeCache.GetTypesDerivedFrom<SlotContainerNode>().Where(t => !string.IsNullOrEmpty(t.Namespace) && t.Namespace.StartsWith(_owner.GraphViewConfig.searchNamespace)).ToArray();
 
             foreach (var type in types)
             {
@@ -142,14 +142,14 @@ namespace Misaki.GraphView.Editor
 
             var element = (SearchContextElement)searchTreeEntry.userData;
 
-            BaseNode node = null;
+            SlotContainerNode node = null;
             if (element.Target is ExposedProperty property)
             {
                 node = new PropertyInputNode(property);
             }
             else if (element.Target is Type nodeType)
             {
-                node = Activator.CreateInstance(nodeType) as BaseNode;
+                node = Activator.CreateInstance(nodeType) as SlotContainerNode;
             }
 
             if (node == null)

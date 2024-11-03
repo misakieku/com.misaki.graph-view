@@ -1,6 +1,6 @@
 namespace Misaki.GraphView.Sample
 {
-    public abstract class BackTraceBaseNode : BaseNode
+    public abstract class BackTraceNode : SlotContainerNode
     {
         protected override void OnPullData(Slot input)
         {

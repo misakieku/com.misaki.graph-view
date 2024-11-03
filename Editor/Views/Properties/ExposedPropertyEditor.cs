@@ -36,10 +36,10 @@ namespace Misaki.GraphView.Editor
 
                 return root;
             }
-
+            
+            var i = graphObject.ExposedProperties.IndexOf(_property);
             foreach (var field in fields)
             {
-                var i = graphObject.ExposedProperties.IndexOf(_property);
                 var serializedProperty = _serializedObject.FindProperty("_exposedProperties")?.GetArrayElementAtIndex(i)?.FindPropertyRelative(field.Name);
                 
                 if (serializedProperty == null)
@@ -52,6 +52,15 @@ namespace Misaki.GraphView.Editor
                 inputField.Bind(_serializedObject);
                 
                 root.Add(inputField);
+            }
+            
+            var showInInspectorProperty = _serializedObject.FindProperty("_exposedProperties")?.GetArrayElementAtIndex(i)?.FindPropertyRelative("showInInspector");
+            if (showInInspectorProperty != null)
+            {
+                var showInInspectorField = new PropertyField(showInInspectorProperty, "Show In Inspector");
+                showInInspectorField.Bind(_serializedObject);
+                
+                root.Add(showInInspectorField);
             }
             
             return root;

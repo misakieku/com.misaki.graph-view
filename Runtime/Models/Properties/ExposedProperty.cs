@@ -8,6 +8,7 @@ namespace Misaki.GraphView
         public string id = Guid.NewGuid().ToString();
         public string propertyName;
         public string propertyType;
+        public bool showInInspector = true;
         
         public virtual object Value { get; set; }
         public virtual Type GetValueType() => Value == null ? typeof(object) : Value.GetType();

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Misaki.GraphView
 {
-    public class PropertyInputNode : BaseNode
+    public class PropertyInputNode : SlotContainerNode
     {
         [SerializeReference]
         private ExposedProperty _property;

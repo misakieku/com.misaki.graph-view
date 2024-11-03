@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,15 +10,18 @@ namespace Misaki.GraphView
     public abstract class GraphObject : ScriptableObject
     {
         [SerializeReference]
-        private List<BaseNode> _nodes = new();
+        private List<SlotContainerNode> _nodes = new();
+        [SerializeField]
+        private List<StickyNoteData> _stickyNotes = new();
         [SerializeField]
         private List<SlotConnection> _connections = new();
         [SerializeReference]
         private List<ExposedProperty> _exposedProperties = new();
         
-        private readonly Dictionary<string, BaseNode> _nodeMap = new();
+        private readonly Dictionary<string, SlotContainerNode> _nodeMap = new();
 
-        public ReadOnlyCollection<BaseNode> Nodes => _nodes.AsReadOnly();
+        public ReadOnlyCollection<SlotContainerNode> Nodes => _nodes.AsReadOnly();
+        public ReadOnlyCollection<StickyNoteData> StickyNotes => _stickyNotes.AsReadOnly();
         public ReadOnlyCollection<SlotConnection> Connections => _connections.AsReadOnly();
         public ReadOnlyCollection<ExposedProperty> ExposedProperties => _exposedProperties.AsReadOnly();
 
@@ -37,39 +41,49 @@ namespace Misaki.GraphView
             }
         }
 
-        public void AddNode(BaseNode baseNode)
+        public void AddNode(SlotContainerNode slotContainerNode)
         {
-            _nodes.Add(baseNode);
-            TryAddNodeToMap(baseNode);
-            baseNode.Initialize(this);
+            _nodes.Add(slotContainerNode);
+            TryAddNodeToMap(slotContainerNode);
+            slotContainerNode.Initialize(this);
         }
 
-        public void RemoveNode(BaseNode baseNode)
+        public void RemoveNode(SlotContainerNode slotContainerNode)
         {
-            _nodes.Remove(baseNode);
-            RemoveNodeFromMap(baseNode);
-            baseNode.UnLoad();
-            baseNode.UnlinkAllSlots();
+            _nodes.Remove(slotContainerNode);
+            RemoveNodeFromMap(slotContainerNode);
+            slotContainerNode.UnLoad();
+            slotContainerNode.UnlinkAllSlots();
         }
 
-        public bool TryAddNodeToMap(BaseNode baseNode)
+        public bool TryAddNodeToMap(SlotContainerNode slotContainerNode)
         {
-            return _nodeMap.TryAdd(baseNode.Id, baseNode);
+            return _nodeMap.TryAdd(slotContainerNode.Id, slotContainerNode);
         }
 
-        public void RemoveNodeFromMap(BaseNode baseNode)
+        public void RemoveNodeFromMap(SlotContainerNode slotContainerNode)
         {
-            _nodeMap.Remove(baseNode.Id);
+            _nodeMap.Remove(slotContainerNode.Id);
         }
 
-        public BaseNode GetNode(string id)
+        public SlotContainerNode GetNode(string id)
         {
             return _nodeMap.GetValueOrDefault(id);
         }
 
-        public bool TryGetNode(string id, out BaseNode baseNode)
+        public bool TryGetNode(string id, out SlotContainerNode slotContainerNode)
         {
-            return _nodeMap.TryGetValue(id, out baseNode);
+            return _nodeMap.TryGetValue(id, out slotContainerNode);
+        }
+        
+        public void AddStickyNote(StickyNoteData stickyNote)
+        {
+            _stickyNotes.Add(stickyNote);
+        }
+        
+        public void RemoveStickyNote(StickyNoteData stickyNote)
+        {
+            _stickyNotes.Remove(stickyNote);
         }
 
         public void AddConnection(SlotConnection connection)
@@ -104,7 +118,7 @@ namespace Misaki.GraphView
             _exposedProperties.Remove(property);
         }
         
-        public void SetTransform(ITransform transform)
+        public void SetGraphTransform(ITransform transform)
         {
             graphPosition = transform.position;
             graphScale = transform.scale;

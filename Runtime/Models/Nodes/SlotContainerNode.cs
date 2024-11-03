@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Misaki.GraphView
 {
     [Serializable]
-    public abstract class BaseNode : SlotContainer
+    public abstract class SlotContainerNode : SlotContainer
     {
         [SerializeField] 
         private GraphObject _graphObject;
@@ -20,16 +20,21 @@ namespace Misaki.GraphView
         public string Id => _id;
         
         public Action OnExecutionCompleted;
-        public Action<BaseNode> OnExecutionFailed;
+        public Action<SlotContainerNode> OnExecutionFailed;
         public Action OnExecuteFlagCleared;
-
+        
         /// <summary>
         /// Initialize the node with the graph object, this method is called when the node is added to the graph.
         /// </summary>
-        public virtual void Initialize(GraphObject graph)
+        public void Initialize(GraphObject graph)
         {
             _graphObject = graph;
 
+            InitializeSlot();
+        }
+
+        public virtual void InitializeSlot()
+        {
             var type = GetType();
             var fields = type.GetFields(ConstResource.NODE_FIELD_BINDING_FLAGS);
 
