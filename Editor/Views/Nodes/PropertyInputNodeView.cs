@@ -11,38 +11,38 @@ namespace Misaki.GraphView.Editor
     {
         private readonly List<Port> _outputPorts = new List<Port>();
         
-        private readonly PropertyInputNode _dataNode;
+        private readonly PropertyInput _data;
         //private readonly ExposedPropertyEditor _editor;
         
-        public PropertyInputNode DataNode => _dataNode;
+        public PropertyInput Data => _data;
         
         public List<Port> InputPorts => null;
         public List<Port> OutputPorts => _outputPorts;
         
-        public PropertyInputNodeView(PropertyInputNode dataNode, Port output) : base(null, output)
+        public PropertyInputNodeView(PropertyInput data, Port output) : base(null, output)
         {
-            _dataNode = dataNode;
+            _data = data;
             //_editor = editor;
 
-            name = dataNode.Property.propertyName;
-            title = dataNode.Property.propertyName;
-            userData = dataNode;
+            name = data.Property.propertyName;
+            title = data.Property.propertyName;
+            userData = data;
 
             this.Q<VisualElement>("top").style.minHeight = 24;
             
             _outputPorts.Add(output);
         }
         
-        public static PropertyInputNodeView Create(PropertyInputNode dataNode, IPortColorManager portColorManager)
+        public static PropertyInputNodeView Create(PropertyInput data, IPortColorManager portColorManager)
         {
-            if (dataNode == null)
+            if (data == null)
             {
                 return null;
             }
             
-            var outputSlot = dataNode.GetSlot(0, SlotDirection.Output);
-            var outputPort = CreateOutputPort(dataNode.Property, outputSlot, portColorManager);
-            var nodeView = new PropertyInputNodeView(dataNode, outputPort);
+            var outputSlot = data.GetSlot(0, SlotDirection.Output);
+            var outputPort = CreateOutputPort(data.Property, outputSlot, portColorManager);
+            var nodeView = new PropertyInputNodeView(data, outputPort);
             
             return nodeView;
         }
@@ -68,12 +68,12 @@ namespace Misaki.GraphView.Editor
             return port;
         }
 
-        public string InspectorName => _dataNode.Property.propertyName;
+        public string InspectorName => _data.Property.propertyName;
 
         public override void SetPosition(Rect newPos)
         {
             base.SetPosition(newPos);
-            _dataNode.position = newPos;
+            _data.position = newPos;
         }
     }
 }

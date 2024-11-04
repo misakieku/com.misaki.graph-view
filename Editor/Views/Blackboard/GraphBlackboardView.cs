@@ -70,7 +70,7 @@ namespace Misaki.GraphView.Editor
                 exposedProperty.propertyName = newValue;
                 _owner.Query<PropertyInputNodeView>().ForEach(n =>
                 {
-                    if (n.DataNode.Property.Equals(exposedProperty))
+                    if (n.Data.Property.Equals(exposedProperty))
                     {
                         n.title = newValue;
                     }

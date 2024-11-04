@@ -10,9 +10,9 @@ using UnityEngine.UIElements;
 
 namespace Misaki.GraphView.Editor
 {
-    public class EditorNodeView : Node, IInspectable, IPortContainer
+    public class ExecutableNodeView : Node, IInspectable, IPortContainer
     {
-        private readonly SlotContainerNode _dataNode;
+        private readonly ExecutableNode _dataNode;
         private readonly Type _nodeType;
         private readonly NodeInfoAttribute _nodeInfo;
         
@@ -24,7 +24,6 @@ namespace Misaki.GraphView.Editor
         
         private readonly VisualElement _logContainer = new();
         
-        public SlotContainerNode DataNode => _dataNode;
         public List<Port>  InputPorts => _inputPorts;
         public List<Port>  OutputPorts => _outputPorts;
         
@@ -32,7 +31,7 @@ namespace Misaki.GraphView.Editor
 
         public string InspectorName => _nodeInfo.Name ?? _nodeType.Name;
 
-        public EditorNodeView(SlotContainerNode dataNode, SerializedObject serializedObject, IPortColorManager portColorManager, ILogger logger)
+        public ExecutableNodeView(ExecutableNode dataNode, SerializedObject serializedObject, IPortColorManager portColorManager, ILogger logger)
         {
             if (dataNode == null)
             {
@@ -59,7 +58,7 @@ namespace Misaki.GraphView.Editor
                 AddToClassList(depth.ToLower().Replace(" ", "-"));
             }
             
-            var inputs = _nodeType.GetProperty(nameof(SlotContainerNode.Inputs));
+            var inputs = _nodeType.GetProperty(nameof(ExecutableNode.Inputs));
 
             if (inputs != null)
             {
@@ -78,7 +77,7 @@ namespace Misaki.GraphView.Editor
                 }
             }
 
-            var outputs = _nodeType.GetProperty(nameof(SlotContainerNode.Outputs));
+            var outputs = _nodeType.GetProperty(nameof(ExecutableNode.Outputs));
 
             if (outputs != null)
             {
@@ -101,14 +100,14 @@ namespace Misaki.GraphView.Editor
             Add(_logContainer);
 
             _dataNode.OnExecuteFlagCleared += OnExecuteFlagCleared;
-            _dataNode.OnExecutionFailed += (_) => AddToClassList("node-execution-failed");
+            _dataNode.OnExecutionFailed += () => AddToClassList("node-execution-failed");
             if (logger != null)
             {
                 logger.OnLog += CreateLogElement;
             }
         }
 
-        private void CreateLogElement(SlotContainerNode node, string message, LogType type)
+        private void CreateLogElement(ExecutableNode node, string message, LogType type)
         {
             if (node.Id != _dataNode.Id)
             {

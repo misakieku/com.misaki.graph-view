@@ -8,7 +8,7 @@ namespace Misaki.GraphView.Editor
 {
     public sealed class GraphInspectorView : GraphSubWindow
     {
-        private const string UIDocumentPath = "Packages/com.misaki.graph-view/Editor/Views/GraphInspectorView.uxml";
+        private const string UI_Document_Path = "Packages/com.misaki.graph-view/Editor/Views/Inspector/GraphInspectorView.uxml";
         
         private readonly Label _header;
         private readonly VisualElement _inspectorPropertiesContainer; 
@@ -21,7 +21,7 @@ namespace Misaki.GraphView.Editor
             style.minWidth = 300;
             style.minHeight = 500;
             
-            var uiDocument = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(UIDocumentPath);
+            var uiDocument = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(UI_Document_Path);
             var inspectorView = uiDocument.Instantiate();
             inspectorView.style.flexGrow = 1;
             

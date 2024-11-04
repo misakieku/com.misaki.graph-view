@@ -13,14 +13,14 @@ namespace Misaki.GraphView.Sample
         {
         }
 
-        public void Execute(ReadOnlyCollection<SlotContainerNode> nodes)
+        public void Execute(ReadOnlyCollection<DataNode> nodes)
         {
             _isRunning = true;
             nodes.ClearAllExecuteFlag();
             
             foreach (var node in nodes)
             {
-                if (node is OutputNode outputNode)
+                if (node is Output outputNode)
                 {
                     outputNode.Execute();
                 }

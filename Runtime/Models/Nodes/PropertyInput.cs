@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Misaki.GraphView
 {
-    public class PropertyInputNode : SlotContainerNode
+    public class PropertyInput : ExecutableNode
     {
         [SerializeReference]
         private ExposedProperty _property;
@@ -13,7 +13,7 @@ namespace Misaki.GraphView
         [NodeOutput]
         public object value;
 
-        public PropertyInputNode(ExposedProperty property)
+        public PropertyInput(ExposedProperty property)
         {
             _property = property;
         }

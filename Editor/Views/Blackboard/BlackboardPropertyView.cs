@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Reflection;
-using UnityEditor;
 using UnityEditor.Experimental.GraphView;
-using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
 namespace Misaki.GraphView.Editor
@@ -19,6 +16,8 @@ namespace Misaki.GraphView.Editor
             _editor = editor;
         }
 
+        public override bool IsDroppable() => true;
+        
         public override void OnSelected()
         {
             base.OnSelected();
@@ -31,7 +30,7 @@ namespace Misaki.GraphView.Editor
             OnItemSelected?.Invoke(null);
         }
         
-        public virtual EditorNodeView CreateNodeView()
+        public virtual ExecutableNodeView CreateNodeView()
         {
             return null;
         }

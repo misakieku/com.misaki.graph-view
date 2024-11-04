@@ -5,7 +5,7 @@ using Misaki.GraphView.Editor;
 namespace Misaki.GraphView.Sample
 {
     [NodeInfo("Add", "Math")]
-    public class AddNode : BackTraceNode
+    public class Add : BackTraceExecutableNode
     {
         [NodeInput]
 #if UNITY_EDITOR

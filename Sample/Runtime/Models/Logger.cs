@@ -7,21 +7,21 @@ namespace Misaki.GraphView.Sample
     {
         private readonly List<string> _logs = new ();
         
-        public Action<SlotContainerNode, string, LogType> OnLog { get; set; }
+        public Action<ExecutableNode, string, LogType> OnLog { get; set; }
         
-        public void LogInfo(SlotContainerNode node, string message)
+        public void LogInfo(ExecutableNode node, string message)
         {
             _logs.Add($"Log Info from node {node.GetType().Name}: {message}");
             OnLog?.Invoke(node, message, LogType.Info);
         }
 
-        public void LogWarning(SlotContainerNode node, string message)
+        public void LogWarning(ExecutableNode node, string message)
         {
             _logs.Add($"Log Warning from node {node.GetType().Name}: {message}");
             OnLog?.Invoke(node, message, LogType.Warning);
         }
 
-        public void LogError(SlotContainerNode node, string message)
+        public void LogError(ExecutableNode node, string message)
         {
             _logs.Add($"Log Error from node {node.GetType().Name}: {message}");
             OnLog?.Invoke(node, message, LogType.Error);

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Reflection;
 using UnityEngine;
 
 namespace Misaki.GraphView
@@ -50,12 +49,12 @@ namespace Misaki.GraphView
         public ReadOnlyCollection<SlotData> LinkedSlotData => _linkedSlotData.AsReadOnly();
 
         [SerializeReference]
-        public SlotContainerNode owner;
+        public DataNode owner;
         public SlotData slotData;
         
         public object value;
         
-        public Slot(SlotContainerNode owner, SlotData slotData)
+        public Slot(DataNode owner, SlotData slotData)
         {
             this.owner = owner;
             this.slotData = slotData;

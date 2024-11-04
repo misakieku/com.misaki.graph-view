@@ -1,34 +1,32 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Reflection;
 using UnityEngine;
 
 namespace Misaki.GraphView
 {
     [Serializable]
-    public abstract class SlotContainerNode : SlotContainer
+    public abstract class ExecutableNode : DataNode, ISlotContainer, IExecutable
     {
-        [SerializeField] 
-        private GraphObject _graphObject;
-        [SerializeField] 
-        private string _id = Guid.NewGuid().ToString();
+        [SerializeField]
+        private List<Slot> _inputs = new ();
+        [SerializeField]
+        private List<Slot> _outputs = new ();
+        
+        public ReadOnlyCollection<Slot> Inputs => _inputs.AsReadOnly();
+        public ReadOnlyCollection<Slot> Outputs => _outputs.AsReadOnly();
         
         private bool _isExecuted;
-
-        public Rect position;
-
-        public GraphObject GraphObject => _graphObject;
-        public string Id => _id;
         
+        public Action OnExecutoinStarted;
         public Action OnExecutionCompleted;
-        public Action<SlotContainerNode> OnExecutionFailed;
+        public Action OnExecutionFailed;
         public Action OnExecuteFlagCleared;
-        
-        /// <summary>
-        /// Initialize the node with the graph object, this method is called when the node is added to the graph.
-        /// </summary>
-        public void Initialize(GraphObject graph)
+
+        public override void Initialize(GraphObject graph)
         {
-            _graphObject = graph;
+            graphObject = graph;
 
             InitializeSlot();
         }
@@ -53,7 +51,7 @@ namespace Misaki.GraphView
                         direction = SlotDirection.Input,
                         valueType = field.FieldType.FullName
                     });
-                    AddInput(inputSlot);
+                    AddSlot(inputSlot);
 
                     continue;
                 }
@@ -69,24 +67,40 @@ namespace Misaki.GraphView
                         direction = SlotDirection.Output,
                         valueType = field.FieldType.FullName
                     });
-                    AddOutput(outputSlot);
+                    AddSlot(outputSlot);
                 }
             }
         }
-
-        /// <summary>
-        /// Unload the node from the graph, this method is called when the node is removed from the graph.
-        /// </summary>
-        public virtual void UnLoad()
+        
+        /// <inheritdoc />
+        public void AddSlot(Slot slot)
         {
+            switch (slot.slotData.direction)
+            {
+                case SlotDirection.Input:
+                    _inputs.Add(slot);
+                    break;
+                case SlotDirection.Output:
+                    _outputs.Add(slot);
+                    break;
+            }
+        }
+        
+        /// <inheritdoc />
+        public void RemoveSlot(Slot slot)
+        {
+            switch (slot.slotData.direction)
+            {
+                case SlotDirection.Input:
+                    _inputs.Remove(slot);
+                    break;
+                case SlotDirection.Output:
+                    _outputs.Remove(slot);
+                    break;
+            }
         }
 
-        /// <summary>
-        /// Get the slot by the index and direction.
-        /// </summary>
-        /// <param name="index"> Index of the slot</param>
-        /// <param name="direction"> Direction of the slot </param>
-        /// <returns> <see cref="Slot"/> The slot that matches the index and direction </returns>
+        /// <inheritdoc />
         public Slot GetSlot(int index, SlotDirection direction)
         {
             return direction switch
@@ -97,27 +111,23 @@ namespace Misaki.GraphView
             };
         }
 
-        /// <summary>
-        /// Unlink all the slots of the node.
-        /// </summary>
+        /// <inheritdoc />
         public void UnlinkAllSlots()
         {
             foreach (var input in Inputs)
             {
                 input.UnlinkAll();
-                _graphObject.RemoveAllConnectionsForSlot(input);
+                graphObject.RemoveAllConnectionsForSlot(input);
             }
 
             foreach (var output in Outputs)
             {
                 output.UnlinkAll();
-                _graphObject.RemoveAllConnectionsForSlot(output);
+                graphObject.RemoveAllConnectionsForSlot(output);
             }
         }
-
-        /// <summary>
-        /// Execute the node.
-        /// </summary>
+        
+        /// <inheritdoc />
         public void Execute()
         {
             if (_isExecuted)
@@ -125,23 +135,33 @@ namespace Misaki.GraphView
                 return;
             }
             
+            OnExecutoinStarted?.Invoke();
+            
             PullData();
 
-            if (!_graphObject.GraphProcessor.IsRunning)
+            if (!graphObject.GraphProcessor.IsRunning)
             {
                 return;
             }
             
             if (!OnExecute())
             {
-                _graphObject.GraphProcessor.Break();
-                OnExecutionFailed?.Invoke(this);
+                graphObject.GraphProcessor.Break();
+                OnExecutionFailed?.Invoke();
                 return;
             }
+            
             PushData();
             
             _isExecuted = true;
             OnExecutionCompleted?.Invoke();
+        }
+        
+        /// <inheritdoc />
+        public void ClearExecutionFlag()
+        {
+            _isExecuted = false;
+            OnExecuteFlagCleared?.Invoke();
         }
 
         private void PullData()
@@ -184,13 +204,18 @@ namespace Misaki.GraphView
                 output.value = property.GetValue(this);
                 foreach (var slotData in output.LinkedSlotData)
                 {
-                    var slot = _graphObject.GetNode(slotData.nodeID).GetSlot(slotData.slotIndex, slotData.direction);
-
+                    var node = graphObject.GetNode(slotData.nodeID);
+                    if (node is not ISlotContainer slotContainer)
+                    {
+                        continue;
+                    }
+                    
+                    var slot = slotContainer.GetSlot(slotData.slotIndex, SlotDirection.Input);
                     if (slotData.valueType == output.slotData.valueType || output.slotData.valueType == typeof(object).FullName)
                     {
                         slot.ReceiveData(output.value);
                     }
-                    else if (_graphObject.ValueConverterManager != null && _graphObject.ValueConverterManager.TryConvert(output.slotData.GetValueType(),
+                    else if (graphObject.ValueConverterManager != null && graphObject.ValueConverterManager.TryConvert(output.slotData.GetValueType(),
                                  slotData.GetValueType(), output.value, out var data))
                     {
                         slot.ReceiveData(data);
@@ -201,17 +226,6 @@ namespace Misaki.GraphView
 
         protected virtual void OnPushData(Slot output)
         {
-        }
-        
-        public bool IsExecuted()
-        {
-            return _isExecuted;
-        }
-        
-        public void ClearExecuteFlag()
-        {
-            _isExecuted = false;
-            OnExecuteFlagCleared?.Invoke();
         }
 
         /// <summary>

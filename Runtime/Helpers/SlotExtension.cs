@@ -13,8 +13,12 @@ namespace Misaki.GraphView
             for (var i = 0; i < slotCount; i++)
             {
                 var other = slot.LinkedSlotData[i];
-                var otherSlot = slot.owner.GraphObject.GetNode(other.nodeID).GetSlot(other.slotIndex, other.direction);
-                otherSlot.owner.GetSlot(other.slotIndex, other.direction)?.Unlink(slot);
+                var otherNode = slot.owner.GraphObject.GetNode(other.nodeID);
+
+                if (otherNode is ISlotContainer slotContainer)
+                {
+                    slotContainer.GetSlot(other.slotIndex, other.direction)?.Unlink(slot);
+                }
             }
         }
         

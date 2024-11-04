@@ -33,7 +33,7 @@ namespace Misaki.GraphView.Editor
             gridBackground.SendToBack();
             
             var minimapConfig = _graphViewConfig.miniMapConfig;
-            if (minimapConfig != null && minimapConfig.enable)
+            if (minimapConfig is { enable: true })
             {
                 var minimap = new MiniMap()
                 {
@@ -76,8 +76,11 @@ namespace Misaki.GraphView.Editor
             InitializeAssetElements();
 
             graphViewChanged += OnGraphViewChanged;
+            
+            RegisterCallback<DragPerformEvent>(OnDragPerform);
+            RegisterCallbackOnce<GeometryChangedEvent>(_ => _graphInspectorView?.DockToParent(layout, DockingPosition.Right, false));
         }
-
+        
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
             base.BuildContextualMenu(evt);
@@ -125,10 +128,6 @@ namespace Misaki.GraphView.Editor
             {
                 AddConnectionView(connection);
             }
-            
-            RegisterCallback<DragPerformEvent>(OnDragPerform);
-            
-            RegisterCallbackOnce<GeometryChangedEvent>(_ => _graphInspectorView?.DockToParent(layout, DockingPosition.Right, false));
         }
 
         private GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChange)
@@ -140,7 +139,7 @@ namespace Misaki.GraphView.Editor
 
                 for (var i = removedElements.Count - 1; i >= 0; i--)
                 {
-                    if (removedElements[i] is Node { userData: SlotContainerNode node })
+                    if (removedElements[i] is Node { userData: ExecutableNode node })
                     {
                         RemoveNode(node);
                     }
@@ -154,14 +153,17 @@ namespace Misaki.GraphView.Editor
                     {
                         if (_slotConnections.Remove(edge, out var connection))
                         {
-                            var inputSlotData = connection.InputSlotData;
-                            var outputSlotData = connection.OutputSlotData;
-                            var inputSlot = _graphObject.GetNode(inputSlotData.nodeID)
-                                .GetSlot(inputSlotData.slotIndex, inputSlotData.direction);
-                            var outputSlot = _graphObject.GetNode(outputSlotData.nodeID)
-                                .GetSlot(outputSlotData.slotIndex, outputSlotData.direction);
+                            var inputNode = _graphObject.GetNode(connection.InputSlotData.nodeID);
+                            var outputNode = _graphObject.GetNode(connection.OutputSlotData.nodeID);
 
-                            inputSlot.Unlink(outputSlot);
+                            if (inputNode is ISlotContainer inputSlotContainer && outputNode is ISlotContainer outputSlotContainer)
+                            {
+                                var inputSlot = inputSlotContainer.GetSlot(connection.InputSlotData.slotIndex, connection.InputSlotData.direction);
+                                var outputSlot = outputSlotContainer.GetSlot(connection.OutputSlotData.slotIndex, connection.OutputSlotData.direction);
+
+                                inputSlot.Unlink(outputSlot);
+                            }
+
                             RemoveConnection(connection);
                         }
                     }
@@ -230,55 +232,50 @@ namespace Misaki.GraphView.Editor
         private void OnDragPerform(DragPerformEvent evt)
         {
             var data = DragAndDrop.GetGenericData("DragSelection");
-            if (data is List<ExposedProperty> properties)
+            if (data is List<ISelectable> selectables)
             {
-                var position = contentViewContainer.WorldToLocal(evt.mousePosition);
-                foreach (var property in properties)
+                var propertyViews = selectables.OfType<BlackboardPropertyView>().ToArray();
+                if (propertyViews.Length <= 0)
                 {
-                    var baseNode = new PropertyInputNode(property);
-                    baseNode.position = new Rect(position, Vector2.zero);
+                    return;
+                }
+
+                var position = (evt.currentTarget as VisualElement).ChangeCoordinatesTo(contentViewContainer, evt.localMousePosition);
+                foreach (var view in propertyViews)
+                {
+                    if (view.userData is not ExposedProperty property)
+                    {
+                        continue;
+                    }
+                    
+                    var baseNode = new PropertyInput(property)
+                    {
+                        position = new Rect(position, Vector2.zero)
+                    };
                     AddNode(baseNode);
                 }
             }
         }
 
-        public void AddNode(SlotContainerNode slotContainerNode)
+        public void AddNode(ExecutableNode executableNode)
         {
-            Undo.RecordObject(_graphObject, $"Add {slotContainerNode.GetType().Name}");
+            Undo.RecordObject(_graphObject, $"Add {executableNode.GetType().Name}");
 
-            _graphObject.AddNode(slotContainerNode);
-            AddNodeView(slotContainerNode);
+            _graphObject.AddNode(executableNode);
+            AddNodeView(executableNode);
 
             EditorUtility.SetDirty(_graphObject);
         }
 
-        public virtual void AddNodeView(SlotContainerNode slotContainerNode)
+        private void AddNodeView(DataNode node)
         {
-            Node nodeView;
-            var types = TypeCache.GetTypesWithAttribute<CustomInspectorAttribute>();
-            var type = types.FirstOrDefault(t =>
-                t.GetCustomAttribute<CustomInspectorAttribute>().InspectorType == slotContainerNode.GetType());
-
-            if (slotContainerNode is PropertyInputNode propertyInputNode)
-            {
-                // type ??= typeof(PropertyInputNodeView);
-                // var slot = propertyInputNode.GetSlot(0, SlotDirection.Output);
-                // nodeView = Activator.CreateInstance(type, propertyInputNode, _graphViewConfig.portColorManager) as PropertyInputNodeView;
-                nodeView = PropertyInputNodeView.Create(propertyInputNode, _graphViewConfig.portColorManager);
-            }
-            else
-            {
-                type ??= typeof(EditorNodeView);
-                nodeView = Activator.CreateInstance(type, slotContainerNode, _graphViewConfig.serializedObject, _graphViewConfig.portColorManager, _graphObject.Logger) as EditorNodeView;
-            }
-
-
+            var nodeView = CreateNodeView(node);
             if (nodeView == null)
             {
                 return;
             }
 
-            nodeView.SetPosition(slotContainerNode.position);
+            nodeView.SetPosition(node.position);
 
             if (nodeView is IInspectable inspectable)
             {
@@ -286,22 +283,41 @@ namespace Misaki.GraphView.Editor
             }
 
             AddElement(nodeView);
-            _nodeViewsMap.Add(slotContainerNode.Id, nodeView);
+            _nodeViewsMap.Add(node.Id, nodeView);
+        }
+        
+        protected virtual Node CreateNodeView(DataNode node)
+        {
+            var types = TypeCache.GetTypesWithAttribute<CustomInspectorAttribute>();
+            var type = types.FirstOrDefault(t =>
+                t.GetCustomAttribute<CustomInspectorAttribute>().InspectorType == node.GetType());
+
+            if (node is PropertyInput propertyInputNode)
+            {
+                return PropertyInputNodeView.Create(propertyInputNode, _graphViewConfig.portColorManager);
+            }
+            else if (node is ExecutableNode executableNode)
+            {
+                type ??= typeof(ExecutableNodeView);
+                return Activator.CreateInstance(type, executableNode, _graphViewConfig.serializedObject, _graphViewConfig.portColorManager, _graphObject.Logger) as ExecutableNodeView;
+            }
+
+            return null;
         }
 
-        private void RemoveNode(SlotContainerNode slotContainerNode)
+        private void RemoveNode(ExecutableNode executableNode)
         {
-            Undo.RecordObject(_graphObject, $"Remove {slotContainerNode.GetType().Name}");
+            Undo.RecordObject(_graphObject, $"Remove {executableNode.GetType().Name}");
 
-            _graphObject.RemoveNode(slotContainerNode);
-            RemoveNodeView(slotContainerNode);
+            _graphObject.RemoveNode(executableNode);
+            RemoveNodeView(executableNode);
 
             EditorUtility.SetDirty(_graphObject);
         }
 
-        private void RemoveNodeView(SlotContainerNode slotContainerNode)
+        private void RemoveNodeView(ExecutableNode executableNode)
         {
-            if (_nodeViewsMap.Remove(slotContainerNode.Id, out var nodeView))
+            if (_nodeViewsMap.Remove(executableNode.Id, out var nodeView))
             {
                 RemoveElement(nodeView);
 

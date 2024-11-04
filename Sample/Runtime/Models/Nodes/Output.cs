@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Misaki.GraphView.Sample
 {
     [NodeInfo("Output Node", "Output")]
-    public class OutputNode : BackTraceNode
+    public class Output : BackTraceExecutableNode
     {
         [NodeInput]
         private float _input;

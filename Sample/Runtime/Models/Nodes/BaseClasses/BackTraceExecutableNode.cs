@@ -1,6 +1,6 @@
 namespace Misaki.GraphView.Sample
 {
-    public abstract class BackTraceNode : SlotContainerNode
+    public abstract class BackTraceExecutableNode : ExecutableNode
     {
         protected override void OnPullData(Slot input)
         {
@@ -10,7 +10,10 @@ namespace Misaki.GraphView.Sample
             }
             
             var outputNode = GraphObject.GetNode(input.LinkedSlotData[0].nodeID);
-            outputNode.Execute();
+            if (outputNode is IExecutable executable)
+            {
+                executable.Execute();
+            }
         }
     }
 }
