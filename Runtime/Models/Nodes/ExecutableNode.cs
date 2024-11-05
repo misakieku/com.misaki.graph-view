@@ -10,16 +10,16 @@ namespace Misaki.GraphView
     public abstract class ExecutableNode : DataNode, ISlotContainer, IExecutable
     {
         [SerializeField]
-        private List<Slot> _inputs = new ();
+        private List<Slot> _inputs = new();
         [SerializeField]
-        private List<Slot> _outputs = new ();
-        
+        private List<Slot> _outputs = new();
+
         public ReadOnlyCollection<Slot> Inputs => _inputs.AsReadOnly();
         public ReadOnlyCollection<Slot> Outputs => _outputs.AsReadOnly();
-        
+
         private bool _isExecuted;
-        
-        public Action OnExecutoinStarted;
+
+        public Action OnExecutionStarted;
         public Action OnExecutionCompleted;
         public Action OnExecutionFailed;
         public Action OnExecuteFlagCleared;
@@ -71,7 +71,7 @@ namespace Misaki.GraphView
                 }
             }
         }
-        
+
         /// <inheritdoc />
         public void AddSlot(Slot slot)
         {
@@ -85,7 +85,7 @@ namespace Misaki.GraphView
                     break;
             }
         }
-        
+
         /// <inheritdoc />
         public void RemoveSlot(Slot slot)
         {
@@ -126,7 +126,7 @@ namespace Misaki.GraphView
                 graphObject.RemoveAllConnectionsForSlot(output);
             }
         }
-        
+
         /// <inheritdoc />
         public void Execute()
         {
@@ -134,29 +134,28 @@ namespace Misaki.GraphView
             {
                 return;
             }
-            
-            OnExecutoinStarted?.Invoke();
-            
-            PullData();
+
+            OnExecutionStarted?.Invoke();
+            Inputs.PullData(OnPullData);
 
             if (!graphObject.GraphProcessor.IsRunning)
             {
                 return;
             }
-            
+
             if (!OnExecute())
             {
                 graphObject.GraphProcessor.Break();
                 OnExecutionFailed?.Invoke();
                 return;
             }
-            
-            PushData();
-            
+
+            Outputs.PushData(OnPushData);
+
             _isExecuted = true;
             OnExecutionCompleted?.Invoke();
         }
-        
+
         /// <inheritdoc />
         public void ClearExecutionFlag()
         {
@@ -164,64 +163,8 @@ namespace Misaki.GraphView
             OnExecuteFlagCleared?.Invoke();
         }
 
-        private void PullData()
-        {
-            foreach (var input in Inputs)
-            {
-                var property = GetType().GetField(input.slotData.slotName, ConstResource.NODE_FIELD_BINDING_FLAGS);
-                if (property == null)
-                {
-                    continue;
-                }
-                
-                OnPullData(input);
-                
-                if (input.LinkedSlotData.Count == 0)
-                {
-                    continue;
-                }
-                
-                property.SetValue(this, input.value);
-            }
-        }
-
         protected virtual void OnPullData(Slot input)
         {
-        }
-
-        private void PushData()
-        {
-            foreach (var output in Outputs)
-            {
-                var property = GetType().GetField(output.slotData.slotName, ConstResource.NODE_FIELD_BINDING_FLAGS);
-                if (property == null)
-                {
-                    continue;
-                }
-
-                OnPushData(output);
-
-                output.value = property.GetValue(this);
-                foreach (var slotData in output.LinkedSlotData)
-                {
-                    var node = graphObject.GetNode(slotData.nodeID);
-                    if (node is not ISlotContainer slotContainer)
-                    {
-                        continue;
-                    }
-                    
-                    var slot = slotContainer.GetSlot(slotData.slotIndex, SlotDirection.Input);
-                    if (slotData.valueType == output.slotData.valueType || output.slotData.valueType == typeof(object).FullName)
-                    {
-                        slot.ReceiveData(output.value);
-                    }
-                    else if (graphObject.ValueConverterManager != null && graphObject.ValueConverterManager.TryConvert(output.slotData.GetValueType(),
-                                 slotData.GetValueType(), output.value, out var data))
-                    {
-                        slot.ReceiveData(data);
-                    }
-                }
-            }
         }
 
         protected virtual void OnPushData(Slot output)

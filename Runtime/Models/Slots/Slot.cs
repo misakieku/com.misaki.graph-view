@@ -28,38 +28,38 @@ namespace Misaki.GraphView
         {
             return HashCode.Combine(slotName, nodeID, slotIndex, direction, valueType);
         }
-        
+
         public static bool operator ==(SlotData left, SlotData right)
         {
             return left.Equals(right);
         }
-        
+
         public static bool operator !=(SlotData left, SlotData right)
         {
             return !left.Equals(right);
         }
     }
-    
+
     [Serializable]
     public class Slot
     {
-        [SerializeField] 
+        [SerializeField]
         private List<SlotData> _linkedSlotData = new();
-        
+
         public ReadOnlyCollection<SlotData> LinkedSlotData => _linkedSlotData.AsReadOnly();
 
         [SerializeReference]
         public DataNode owner;
         public SlotData slotData;
-        
+
         public object value;
-        
+
         public Slot(DataNode owner, SlotData slotData)
         {
             this.owner = owner;
             this.slotData = slotData;
         }
-        
+
         /// <summary>
         /// Link the current slot with another slot.
         /// </summary>
@@ -70,16 +70,16 @@ namespace Misaki.GraphView
             {
                 return;
             }
-            
+
             if (_linkedSlotData.Contains(other.slotData))
             {
                 return;
             }
-            
+
             _linkedSlotData.Add(other.slotData);
             other._linkedSlotData.Add(slotData);
         }
-        
+
         /// <summary>
         /// Unlink the current slot with another slot.
         /// </summary>
@@ -88,13 +88,6 @@ namespace Misaki.GraphView
         {
             _linkedSlotData.Remove(other.slotData);
             other._linkedSlotData.Remove(slotData);
-        }
-
-        public void ReceiveData(object data)
-        {
-            value = data;
-            // We move this to PullData method in BaseNode
-            //owner.GetType().GetField(slotData.slotName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.SetValue(owner, data);
         }
     }
 }

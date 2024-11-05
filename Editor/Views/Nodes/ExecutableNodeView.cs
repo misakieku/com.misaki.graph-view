@@ -15,19 +15,19 @@ namespace Misaki.GraphView.Editor
         private readonly ExecutableNode _dataNode;
         private readonly Type _nodeType;
         private readonly NodeInfoAttribute _nodeInfo;
-        
-        private readonly List<Port> _inputPorts = new ();
-        private readonly List<Port> _outputPorts = new ();
-        
+
+        private readonly List<Port> _inputPorts = new();
+        private readonly List<Port> _outputPorts = new();
+
         private readonly IPortColorManager _portColorManager;
         private readonly SerializedObject _serializedObject;
-        
+
         private readonly VisualElement _logContainer = new();
-        
-        public List<Port>  InputPorts => _inputPorts;
-        public List<Port>  OutputPorts => _outputPorts;
-        
-        public Action<IInspectable> OnItemSelected { get; set; }
+
+        public Action<IInspectable> OnItemSelected
+        {
+            get; set;
+        }
 
         public string InspectorName => _nodeInfo.Name ?? _nodeType.Name;
 
@@ -37,19 +37,19 @@ namespace Misaki.GraphView.Editor
             {
                 return;
             }
-            
+
             _dataNode = dataNode;
             _portColorManager = portColorManager;
             _serializedObject = serializedObject;
-            
+
             userData = dataNode;
-            
+
             _nodeType = dataNode.GetType();
             _nodeInfo = _nodeType.GetCustomAttribute<NodeInfoAttribute>();
-            
+
             name = _nodeInfo.Name ?? _nodeType.Name;
             title = _nodeInfo.Name ?? _nodeType.Name;
-            
+
             // Add the category as a class to the node so that we can style the node based on the category
             var depths = _nodeInfo.Category.Split('/').ToList();
             depths.Add(_nodeInfo.Name);
@@ -57,13 +57,13 @@ namespace Misaki.GraphView.Editor
             {
                 AddToClassList(depth.ToLower().Replace(" ", "-"));
             }
-            
+
             var inputs = _nodeType.GetProperty(nameof(ExecutableNode.Inputs));
 
             if (inputs != null)
             {
                 var inputSlots = (IList<Slot>)inputs.GetValue(_dataNode);
-                
+
                 if (inputSlots == null || inputSlots.Count == 0)
                 {
                     inputContainer.style.display = DisplayStyle.None;
@@ -94,7 +94,7 @@ namespace Misaki.GraphView.Editor
                     }
                 }
             }
-            
+
             _logContainer.style.position = Position.Absolute;
             _logContainer.style.top = 8;
             Add(_logContainer);
@@ -107,15 +107,15 @@ namespace Misaki.GraphView.Editor
             }
         }
 
-        private void CreateLogElement(ExecutableNode node, string message, LogType type)
+        private void CreateLogElement(DataNode node, string message, LogType type)
         {
             if (node.Id != _dataNode.Id)
             {
                 return;
             }
-            
+
             _logContainer.style.left = layout.width;
-            
+
             var logIcon = new Image()
             {
                 image = type switch
@@ -129,12 +129,12 @@ namespace Misaki.GraphView.Editor
                 {
                     width = 24,
                     height = 24,
-                    
+
                     borderBottomLeftRadius = 4,
                     borderTopRightRadius = 4,
                     borderTopLeftRadius = 4,
                     borderBottomRightRadius = 4,
-                    
+
                     flexDirection = FlexDirection.Row,
                     alignItems = Align.Center,
                     paddingBottom = 1,
@@ -150,7 +150,7 @@ namespace Misaki.GraphView.Editor
                     }
                 }
             };
-            
+
             _logContainer.Add(logIcon);
         }
 
@@ -205,11 +205,21 @@ namespace Misaki.GraphView.Editor
             base.OnSelected();
             OnItemSelected?.Invoke(this);
         }
-        
+
         public override void OnUnselected()
         {
             base.OnUnselected();
             OnItemSelected?.Invoke(null);
+        }
+
+        public Port GetPort(int index, Direction direction)
+        {
+            return direction switch
+            {
+                Direction.Input => _inputPorts[index],
+                Direction.Output => _outputPorts[index],
+                _ => null
+            };
         }
 
         /// <summary>
@@ -218,7 +228,7 @@ namespace Misaki.GraphView.Editor
         public virtual VisualElement CreateInspector()
         {
             var root = new VisualElement();
-            
+
             if (_serializedObject.targetObject is not GraphObject graphObject)
             {
                 return root;
@@ -239,7 +249,7 @@ namespace Misaki.GraphView.Editor
             foreach (var field in fields)
             {
                 var serializedProperty = _serializedObject.FindProperty("_nodes")?.GetArrayElementAtIndex(i)?.FindPropertyRelative(field.Name);
-                
+
                 if (serializedProperty == null)
                 {
                     continue;
@@ -249,7 +259,7 @@ namespace Misaki.GraphView.Editor
                 {
                     continue;
                 }
-                
+
                 var propertyName = field.GetCustomAttribute<InspectorInputAttribute>().Name ?? ObjectNames.NicifyVariableName(field.Name);
 
                 if (field.GetCustomAttribute<NodeInputAttribute>() is not null)
@@ -263,16 +273,16 @@ namespace Misaki.GraphView.Editor
                         }
                     }
                 }
-                
+
                 var inputField = new PropertyField(serializedProperty, propertyName);
                 inputField.Bind(_serializedObject);
-                
+
                 root.Add(inputField);
             }
-            
+
             return root;
         }
-        
+
         protected VisualElement CreateFieldForConnectedSlot(Slot slot, string propertyName)
         {
             var root = new VisualElement()
@@ -288,7 +298,7 @@ namespace Misaki.GraphView.Editor
                     marginRight = 3
                 }
             };
-            
+
             var label = new Label(propertyName)
             {
                 style =
@@ -297,7 +307,7 @@ namespace Misaki.GraphView.Editor
                 }
             };
             label.AddToClassList("unity-base-field__label");
-            
+
             var value = new Label($"Connected to {ObjectNames.NicifyVariableName(slot.LinkedSlotData[0].slotName)}");
             value.AddToClassList("unity-base-field__input");
 
