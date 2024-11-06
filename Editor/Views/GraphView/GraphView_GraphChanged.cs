@@ -46,16 +46,19 @@ namespace Misaki.GraphView.Editor
                 }
             }
 
-            // if (graphViewChange.movedElements != null)
-            // {
-            //     var movedElements = graphViewChange.movedElements;
-            //     Undo.RecordObject(_graphObject, $"Move {movedElements.FirstOrDefault()?.GetType().Name}");
-            //
-            //     foreach (var element in graphViewChange.movedElements)
-            //     {
-            //         element.SetPosition(element.GetPosition());
-            //     }
-            // }
+            if (graphViewChange.movedElements != null)
+            {
+                var movedElements = graphViewChange.movedElements;
+                Undo.RecordObject(_graphObject, $"Move {movedElements.FirstOrDefault()?.GetType().Name}");
+
+                foreach (var element in movedElements)
+                {
+                    if (element is IDataNodeView dataNodeView)
+                    {
+                        dataNodeView.GetDataNode().position = element.GetPosition();
+                    }
+                }
+            }
 
             if (graphViewChange.edgesToCreate != null)
             {
@@ -63,14 +66,15 @@ namespace Misaki.GraphView.Editor
                 Undo.RecordObject(_graphObject, $"Connect {createdEdges.FirstOrDefault()?.GetType().Name}");
 
                 foreach (var edge in createdEdges)
+                {
                     if (edge.input.userData is Slot inputSlot && edge.output.userData is Slot outputSlot)
                     {
-                        var connection = new SlotConnection(inputSlot.slotData, outputSlot.slotData);
+                        outputSlot.Link(inputSlot, out var connection);
                         _slotConnections.Add(edge, connection);
 
-                        outputSlot.Link(inputSlot);
                         AddConnection(connection);
                     }
+                }
             }
 
             _graphObject.SetGraphTransform(viewTransform);

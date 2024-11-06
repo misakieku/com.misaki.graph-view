@@ -10,7 +10,7 @@ using UnityEngine.UIElements;
 
 namespace Misaki.GraphView.Editor
 {
-    public class ExecutableNodeView : Node, IInspectable, IPortContainer
+    public class ExecutableNodeView : Node, IInspectable, IPortContainer, IDataNodeView<ExecutableNode>
     {
         private readonly ExecutableNode _dataNode;
         private readonly Type _nodeType;
@@ -23,6 +23,9 @@ namespace Misaki.GraphView.Editor
         private readonly SerializedObject _serializedObject;
 
         private readonly VisualElement _logContainer = new();
+
+        public ExecutableNode DataNode => _dataNode;
+        public DataNode GetDataNode() => _dataNode;
 
         public Action<IInspectable> OnItemSelected
         {
@@ -192,12 +195,6 @@ namespace Misaki.GraphView.Editor
 
             outputContainer.Add(outputPort);
             _outputPorts.Add(outputPort);
-        }
-
-        public override void SetPosition(Rect newPos)
-        {
-            base.SetPosition(newPos);
-            _dataNode.position = newPos;
         }
 
         public override void OnSelected()

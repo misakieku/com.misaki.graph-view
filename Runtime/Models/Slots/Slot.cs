@@ -64,20 +64,24 @@ namespace Misaki.GraphView
         /// Link the current slot with another slot.
         /// </summary>
         /// <param name="other"> The slot need to be linked </param>
-        public void Link(Slot other)
+        public bool Link(Slot other, out SlotConnection connection)
         {
+            connection = default;
             if (other.slotData.direction == slotData.direction)
             {
-                return;
+                return false;
             }
 
             if (_linkedSlotData.Contains(other.slotData))
             {
-                return;
+                return false;
             }
 
             _linkedSlotData.Add(other.slotData);
             other._linkedSlotData.Add(slotData);
+            connection = new(slotData, other.slotData);
+
+            return true;
         }
 
         /// <summary>

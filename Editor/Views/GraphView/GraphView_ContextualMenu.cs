@@ -28,7 +28,7 @@ namespace Misaki.GraphView.Editor
                 }, DropdownMenuAction.AlwaysEnabled);
             }
 
-            if (evt.target is Edge)
+            if (evt.target is Edge edge)
             {
                 evt.menu.AppendAction("Create Relay Node", e =>
                 {
@@ -37,7 +37,7 @@ namespace Misaki.GraphView.Editor
                         position = new Rect(mousePosition, Vector2.zero)
                     };
 
-                    AddRelayNode(relayNode);
+                    AddRelayNode(relayNode, edge);
                 }, DropdownMenuAction.AlwaysEnabled);
             }
         }

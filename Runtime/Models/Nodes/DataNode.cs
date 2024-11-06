@@ -15,7 +15,7 @@ namespace Misaki.GraphView
 
         public GraphObject GraphObject => graphObject;
         public string Id => id;
-        
+
         /// <summary>
         /// Initialize the node with the graph object, this method is called when the node is added to the graph.
         /// </summary>
@@ -23,9 +23,9 @@ namespace Misaki.GraphView
         {
             graphObject = graph;
         }
-        
+
         /// <summary>
-        /// Unload the node, this method is called when the node is removed from the graph.
+        /// Dispose the node, this method is called when the node is removed from the graph.
         /// </summary>
         public virtual void Dispose()
         {

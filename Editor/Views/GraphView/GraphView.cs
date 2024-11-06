@@ -33,15 +33,15 @@ namespace Misaki.GraphView.Editor
             Add(gridBackground);
             gridBackground.SendToBack();
 
-            var minimapConfig = _graphViewConfig.miniMapConfig;
-            if (minimapConfig is { enable: true })
+            var miniMapConfig = _graphViewConfig.miniMapConfig;
+            if (miniMapConfig is { enable: true })
             {
-                var minimap = new MiniMap()
+                var miniMap = new MiniMap()
                 {
                     anchored = true
                 };
-                minimap.SetPosition(minimapConfig.position);
-                Add(minimap);
+                miniMap.SetPosition(miniMapConfig.position);
+                Add(miniMap);
             }
 
             _blackboardView = new GraphBlackboardView(_graphObject, this, _graphViewConfig.serializedObject, _graphViewConfig.exposedPropertyTypeManager);
@@ -135,9 +135,9 @@ namespace Misaki.GraphView.Editor
         private void OnDragPerform(DragPerformEvent evt)
         {
             var data = DragAndDrop.GetGenericData("DragSelection");
-            if (data is List<ISelectable> selectables)
+            if (data is List<ISelectable> selectable)
             {
-                var propertyViews = selectables.OfType<BlackboardPropertyView>().ToArray();
+                var propertyViews = selectable.OfType<BlackboardPropertyView>().ToArray();
                 if (propertyViews.Length <= 0)
                 {
                     return;

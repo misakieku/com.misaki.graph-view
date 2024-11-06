@@ -9,10 +9,10 @@ namespace Misaki.GraphView
     [Serializable]
     public struct SlotConnection : IEquatable<SlotConnection>
     {
-        [SerializeField] 
+        [SerializeField]
         private SlotData _inputSlotData;
 
-        [SerializeField] 
+        [SerializeField]
         private SlotData _outputSlotData;
 
         /// <summary>
@@ -42,6 +42,16 @@ namespace Misaki.GraphView
         public override int GetHashCode()
         {
             return HashCode.Combine(InputSlotData, OutputSlotData);
+        }
+
+        public static bool operator ==(SlotConnection left, SlotConnection right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(SlotConnection left, SlotConnection right)
+        {
+            return !left.Equals(right);
         }
     }
 }

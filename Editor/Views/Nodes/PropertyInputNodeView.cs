@@ -1,21 +1,21 @@
 ﻿using UnityEditor.Experimental.GraphView;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Misaki.GraphView.Editor
 {
-    public class PropertyInputNodeView : TokenNode, IPortContainer
+    public class PropertyInputNodeView : TokenNode, IPortContainer, IDataNodeView<PropertyInput>
     {
         private readonly Port _outputPort;
 
-        private readonly PropertyInput _data;
+        private readonly PropertyInput _dataNode;
         //private readonly ExposedPropertyEditor _editor;
 
-        public PropertyInput Data => _data;
+        public PropertyInput DataNode => _dataNode;
+        public DataNode GetDataNode() => _dataNode;
 
         public PropertyInputNodeView(PropertyInput data, Port output) : base(null, output)
         {
-            _data = data;
+            _dataNode = data;
             _outputPort = output;
 
             name = data.Property.propertyName;
@@ -60,13 +60,7 @@ namespace Misaki.GraphView.Editor
             return port;
         }
 
-        public string InspectorName => _data.Property.propertyName;
-
-        public override void SetPosition(Rect newPos)
-        {
-            base.SetPosition(newPos);
-            _data.position = newPos;
-        }
+        public string InspectorName => _dataNode.Property.propertyName;
 
         public Port GetPort(int index, Direction direction)
         {

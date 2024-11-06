@@ -17,7 +17,7 @@ namespace Misaki.GraphView
         private List<SlotConnection> _connections = new();
         [SerializeReference]
         private List<ExposedProperty> _exposedProperties = new();
-        
+
         private readonly Dictionary<string, DataNode> _nodeMap = new();
 
         public ReadOnlyCollection<DataNode> Nodes => _nodes.AsReadOnly();
@@ -27,7 +27,7 @@ namespace Misaki.GraphView
 
         public Vector3 graphPosition;
         public Vector3 graphScale = Vector3.one;
-        
+
         public virtual IGraphProcessor GraphProcessor { get; } = null;
         public virtual IValueConverterManager ValueConverterManager { get; } = null;
         public virtual ILogger Logger { get; } = null;
@@ -41,33 +41,34 @@ namespace Misaki.GraphView
             }
         }
 
-        public void AddNode(DataNode executableNode)
+        public void AddNode(DataNode node)
         {
-            _nodes.Add(executableNode);
-            TryAddNodeToMap(executableNode);
-            executableNode.Initialize(this);
+            _nodes.Add(node);
+            TryAddNodeToMap(node);
+            node.Initialize(this);
         }
 
         public void RemoveNode(DataNode node)
         {
             _nodes.Remove(node);
             RemoveNodeFromMap(node);
-            node.Dispose();
 
             if (node is ISlotContainer slotContainer)
             {
                 slotContainer.UnlinkAllSlots();
             }
+
+            node.Dispose();
         }
 
-        public bool TryAddNodeToMap(DataNode executable)
+        public bool TryAddNodeToMap(DataNode node)
         {
-            return _nodeMap.TryAdd(executable.Id, executable);
+            return _nodeMap.TryAdd(node.Id, node);
         }
 
-        public void RemoveNodeFromMap(DataNode executableNode)
+        public void RemoveNodeFromMap(DataNode node)
         {
-            _nodeMap.Remove(executableNode.Id);
+            _nodeMap.Remove(node.Id);
         }
 
         public DataNode GetNode(string id)
@@ -75,16 +76,16 @@ namespace Misaki.GraphView
             return _nodeMap.GetValueOrDefault(id);
         }
 
-        public bool TryGetNode(string id, out DataNode executable)
+        public bool TryGetNode(string id, out DataNode node)
         {
-            return _nodeMap.TryGetValue(id, out executable);
+            return _nodeMap.TryGetValue(id, out node);
         }
-        
+
         public void AddStickyNote(StickyNoteData stickyNote)
         {
             _stickyNotes.Add(stickyNote);
         }
-        
+
         public void RemoveStickyNote(StickyNoteData stickyNote)
         {
             _stickyNotes.Remove(stickyNote);
@@ -111,17 +112,17 @@ namespace Misaki.GraphView
             return _connections.FirstOrDefault(connection =>
                 connection.InputSlotData == input.slotData && connection.OutputSlotData == output.slotData);
         }
-        
+
         public void AddExposedProperty(ExposedProperty property)
         {
             _exposedProperties.Add(property);
         }
-        
+
         public void RemoveExposedProperty(ExposedProperty property)
         {
             _exposedProperties.Remove(property);
         }
-        
+
         public void SetGraphTransform(ITransform transform)
         {
             graphPosition = transform.position;
@@ -134,7 +135,7 @@ namespace Misaki.GraphView
             {
                 throw new ArgumentNullException(nameof(GraphProcessor), "GraphProcessor is null.");
             }
-            
+
             GraphProcessor.UpdateComputeOrder();
             GraphProcessor.Execute(Nodes);
         }

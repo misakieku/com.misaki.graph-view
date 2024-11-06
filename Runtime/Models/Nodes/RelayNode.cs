@@ -10,6 +10,8 @@ namespace Misaki.GraphView
 
         private bool _isExecuted;
 
+        public string portValueType;
+
         public override void Initialize(GraphObject graph)
         {
             graphObject = graph;
@@ -31,6 +33,8 @@ namespace Misaki.GraphView
                 direction = SlotDirection.Output,
                 valueType = typeof(object).FullName
             });
+
+            portValueType = typeof(object).FullName;
         }
 
         public void AddSlot(Slot slot)

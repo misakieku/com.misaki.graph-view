@@ -52,6 +52,10 @@ namespace Misaki.GraphView.Editor
                 type ??= typeof(ExecutableNodeView);
                 return Activator.CreateInstance(type, executableNode, _graphViewConfig.serializedObject, _graphViewConfig.portColorManager, _graphObject.Logger) as ExecutableNodeView;
             }
+            else if (node is RelayNode relayNode)
+            {
+                return new RelayNodeView(relayNode, _graphViewConfig.portColorManager);
+            }
 
             return null;
         }
@@ -123,10 +127,14 @@ namespace Misaki.GraphView.Editor
             EditorUtility.SetDirty(_graphObject);
         }
 
-        private void RemoveConnection(SlotConnection connection)
+        private void RemoveConnection(SlotConnection connection, bool notify = true)
         {
-            Undo.RecordObject(_graphObject, $"Remove {connection.GetType().Name}");
+            if (notify)
+            {
+                Undo.RecordObject(_graphObject, $"Remove {connection.GetType().Name}");
+            }
 
+            RemoveConnectionView(connection);
             _graphObject.RemoveConnection(connection);
 
             EditorUtility.SetDirty(_graphObject);
@@ -148,29 +156,55 @@ namespace Misaki.GraphView.Editor
                 return;
             }
 
-            var inputPort = inputPortContainer.GetPort(inputSlotData.slotIndex, Direction.Input);
-            var outputPort = outputPortContainer.GetPort(outputSlotData.slotIndex, Direction.Output);
+            var portA = inputPortContainer.GetPort(inputSlotData.slotIndex, (Direction)inputSlotData.direction);
+            var portB = outputPortContainer.GetPort(outputSlotData.slotIndex, (Direction)outputSlotData.direction);
 
-            var edge = inputPort.ConnectTo(outputPort);
+            var edge = portA.ConnectTo(portB);
             AddElement(edge);
             _slotConnections.Add(edge, connection);
         }
 
-        public void AddRelayNode(RelayNode relayNode)
+        private void RemoveConnectionView(SlotConnection connection)
+        {
+            var edge = _slotConnections.FirstOrDefault(x => x.Value == connection).Key;
+            if (edge != null)
+            {
+                RemoveElement(edge);
+                _slotConnections.Remove(edge);
+            }
+        }
+
+        public void AddRelayNode(RelayNode relayNode, Edge edge)
         {
             Undo.RecordObject(_graphObject, $"Add {relayNode.GetType().Name}");
 
             _graphObject.AddNode(relayNode);
-            AddRelayNodeView(relayNode);
+            AddRelayNodeView(relayNode, edge);
+
+            var connection = _slotConnections[edge];
+            RemoveConnection(connection, false);
 
             EditorUtility.SetDirty(_graphObject);
         }
 
-        private void AddRelayNodeView(RelayNode relayNode)
+        private void AddRelayNodeView(RelayNode relayNode, Edge edge)
         {
             var relayNodeView = new RelayNodeView(relayNode, _graphViewConfig.portColorManager);
             relayNodeView.SetPosition(relayNode.position);
+
+            relayNodeView.Connect(edge,
+                out var inputConnection, out var outputConnection,
+                out var inputEdge, out var outputEdge);
+
+            _graphObject.AddConnection(inputConnection);
+            _graphObject.AddConnection(outputConnection);
+
+            _slotConnections.Add(inputEdge, inputConnection);
+            _slotConnections.Add(outputEdge, outputConnection);
+
             AddElement(relayNodeView);
+            AddElement(inputEdge);
+            AddElement(outputEdge);
         }
     }
 }
