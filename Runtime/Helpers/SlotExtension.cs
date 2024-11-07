@@ -46,20 +46,10 @@ namespace Misaki.GraphView
         /// <param name="OnPullData">The action to execute when pulling data.</param>
         public static void PullData(this Slot slot, Action<Slot> OnPullData)
         {
+            OnPullData?.Invoke(slot);
+
             var property = slot.owner.GetType().GetField(slot.slotData.slotName, ConstResource.NODE_FIELD_BINDING_FLAGS);
-            if (property == null)
-            {
-                return;
-            }
-
-            OnPullData(slot);
-
-            if (slot.LinkedSlotData.Count == 0)
-            {
-                return;
-            }
-
-            property.SetValue(slot.owner, slot.value);
+            property?.SetValue(slot.owner, slot.value);
         }
 
         /// <summary>
@@ -70,14 +60,12 @@ namespace Misaki.GraphView
         public static void PushData(this Slot slot, Action<Slot> OnPushData)
         {
             var property = slot.owner.GetType().GetField(slot.slotData.slotName, ConstResource.NODE_FIELD_BINDING_FLAGS);
-            if (property == null)
+            if (property != null)
             {
-                return;
+                slot.value = property.GetValue(slot.owner);
             }
 
-            OnPushData(slot);
-
-            slot.value = property.GetValue(slot.owner);
+            OnPushData?.Invoke(slot);
 
             foreach (var slotData in slot.LinkedSlotData)
             {

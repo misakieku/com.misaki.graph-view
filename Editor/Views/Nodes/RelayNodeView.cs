@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 
@@ -23,6 +25,9 @@ namespace Misaki.GraphView.Editor
 
             _inputPort = Port.Create<Edge>(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(object));
             _outputPort = Port.Create<Edge>(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(object));
+
+            _inputPort.userData = _dataNode.GetSlot(0, SlotDirection.Input);
+            _outputPort.userData = _dataNode.GetSlot(0, SlotDirection.Output);
 
             this.Q<VisualElement>("title").style.height = 0;
             var divider = this.Q<VisualElement>("divider");
@@ -62,6 +67,38 @@ namespace Misaki.GraphView.Editor
 
                 SetPortsTypeAndColor(input.portType);
             }
+        }
+
+        public void Disconnect(out List<SlotConnection> newConnections, out List<Edge> newEdges)
+        {
+            newConnections = new List<SlotConnection>();
+            newEdges = new List<Edge>();
+
+            if (_inputPort.userData is not Slot inputSlot || _outputPort.userData is not Slot outputSlot)
+            {
+                return;
+            }
+
+            var linkedOutputPort = _inputPort.connections.FirstOrDefault().output;
+
+            foreach (var edge in _outputPort.connections.ToList())
+            {
+                var linkedInputPort = edge.input;
+                if (linkedOutputPort.userData is Slot linkedOutputSlot && linkedInputPort.userData is Slot linkedInputSlot)
+                {
+                    linkedOutputSlot.Link(linkedInputSlot, out var inputConnection);
+                    newConnections.Add(inputConnection);
+                    newEdges.Add(linkedOutputPort.ConnectTo(linkedInputPort));
+                }
+            }
+
+            inputSlot.UnlinkAll();
+            outputSlot.UnlinkAll();
+
+            _inputPort.DisconnectAll();
+            _outputPort.DisconnectAll();
+
+            return;
         }
 
         private void SetPortsTypeAndColor(Type portType)

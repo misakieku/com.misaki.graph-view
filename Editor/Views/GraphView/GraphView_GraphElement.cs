@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
+using UnityEngine;
 
 namespace Misaki.GraphView.Editor
 {
@@ -64,8 +65,8 @@ namespace Misaki.GraphView.Editor
         {
             Undo.RecordObject(_graphObject, $"Remove {dataNode.GetType().Name}");
 
-            _graphObject.RemoveNode(dataNode);
             RemoveNodeView(dataNode);
+            _graphObject.RemoveNode(dataNode);
 
             EditorUtility.SetDirty(_graphObject);
         }
@@ -74,12 +75,25 @@ namespace Misaki.GraphView.Editor
         {
             if (_nodeViewsMap.Remove(dataNode.Id, out var nodeView))
             {
-                RemoveElement(nodeView);
-
                 if (nodeView is IInspectable inspectable)
                 {
                     inspectable.OnItemSelected -= ChangeInspectorView;
                 }
+
+                if (nodeView is RelayNodeView relayNodeView)
+                {
+                    relayNodeView.Disconnect(out var newConnections, out var newEdges);
+                    _graphObject.AddConnections(newConnections);
+
+                    var count = Mathf.Min(newConnections.Count, newEdges.Count);
+                    for (var i = 0; i < count; i++)
+                    {
+                        _slotConnections.Add(newEdges[i], newConnections[i]);
+                        AddElement(newEdges[i]);
+                    }
+                }
+
+                RemoveElement(nodeView);
             }
         }
 
@@ -104,9 +118,8 @@ namespace Misaki.GraphView.Editor
         {
             Undo.RecordObject(_graphObject, $"Remove {stickyNote.title}");
 
-            _graphObject.RemoveStickyNote(stickyNote);
-
             RemoveStickyNoteView(stickyNote);
+            _graphObject.RemoveStickyNote(stickyNote);
         }
 
         private void RemoveStickyNoteView(StickyNoteData stickyNote)
@@ -174,7 +187,7 @@ namespace Misaki.GraphView.Editor
             }
         }
 
-        public void AddRelayNode(RelayNode relayNode, Edge edge)
+        private void AddRelayNode(RelayNode relayNode, Edge edge)
         {
             Undo.RecordObject(_graphObject, $"Add {relayNode.GetType().Name}");
 
@@ -205,6 +218,8 @@ namespace Misaki.GraphView.Editor
             AddElement(relayNodeView);
             AddElement(inputEdge);
             AddElement(outputEdge);
+
+            _nodeViewsMap.Add(relayNode.Id, relayNodeView);
         }
     }
 }

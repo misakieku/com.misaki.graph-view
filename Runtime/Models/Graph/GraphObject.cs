@@ -96,6 +96,14 @@ namespace Misaki.GraphView
             _connections.Add(connection);
         }
 
+        public void AddConnections(IEnumerable<SlotConnection> connections)
+        {
+            foreach (var connection in connections)
+            {
+                AddConnection(connection);
+            }
+        }
+
         public void RemoveConnection(SlotConnection connection)
         {
             _connections.Remove(connection);

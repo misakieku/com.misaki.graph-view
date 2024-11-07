@@ -68,6 +68,12 @@ namespace Misaki.GraphView
                 return;
             }
 
+            var connectedOutputNode = graphObject.GetNode(_inputSlot.LinkedSlotData[0].nodeID);
+            if (connectedOutputNode is IExecutable executable)
+            {
+                executable.Execute();
+            }
+
             _outputSlot.ReceiveData(_inputSlot.value);
             _outputSlot.PushData(null);
 
