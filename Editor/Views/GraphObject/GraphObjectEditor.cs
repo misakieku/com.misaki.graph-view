@@ -10,10 +10,10 @@ namespace Misaki.GraphView.Editor
     [CustomEditor(typeof(GraphObject))]
     public class GraphObjectEditor : UnityEditor.Editor
     {
-        private readonly Dictionary<string, List<SerializedProperty>> _inspectorPropertyMap = new ();
-        
+        private readonly Dictionary<string, List<SerializedProperty>> _inspectorPropertyMap = new();
+
         private GraphObject _graphObject;
-        
+
         private void OnEnable()
         {
             _graphObject = target as GraphObject;
@@ -41,7 +41,7 @@ namespace Misaki.GraphView.Editor
                 {
                     continue;
                 }
-                
+
                 var fields = property.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
                 var i = _graphObject.ExposedProperties.IndexOf(property);
                 foreach (var field in fields)
@@ -51,12 +51,12 @@ namespace Misaki.GraphView.Editor
                     {
                         continue;
                     }
-                    
+
                     if (!_inspectorPropertyMap.ContainsKey(property.propertyName))
                     {
-                        _inspectorPropertyMap[property.propertyName] = new ();
+                        _inspectorPropertyMap[property.propertyName] = new();
                     }
-                    
+
                     _inspectorPropertyMap[property.propertyName].Add(serializedProperty);
                 }
             }
@@ -64,12 +64,17 @@ namespace Misaki.GraphView.Editor
 
         protected virtual VisualElement CreateInspectorProperty()
         {
+            if (_inspectorPropertyMap.Count <= 0)
+            {
+                return null;
+            }
+
             var graphPropertyFoldout = new Foldout()
             {
                 text = "Graph Properties",
                 value = true
             };
-            
+
             foreach (var property in _inspectorPropertyMap)
             {
                 var label = new Label(property.Key)
@@ -81,7 +86,7 @@ namespace Misaki.GraphView.Editor
                         marginBottom = 2,
                     }
                 };
-                
+
                 var propertyContainer = new VisualElement()
                 {
                     style =
@@ -96,7 +101,7 @@ namespace Misaki.GraphView.Editor
                     inputField.Bind(serializedObject);
                     propertyContainer.Add(inputField);
                 }
-                
+
                 graphPropertyFoldout.Add(label);
                 graphPropertyFoldout.Add(propertyContainer);
             }

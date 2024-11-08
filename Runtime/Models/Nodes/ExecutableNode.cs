@@ -9,15 +9,17 @@ namespace Misaki.GraphView
     [Serializable]
     public abstract class ExecutableNode : DataNode, ISlotContainer, IExecutable
     {
-        [SerializeField]
-        private List<Slot> _inputs = new();
-        [SerializeField]
-        private List<Slot> _outputs = new();
-
-        public ReadOnlyCollection<Slot> Inputs => _inputs.AsReadOnly();
-        public ReadOnlyCollection<Slot> Outputs => _outputs.AsReadOnly();
+        [SerializeReference]
+        private List<ISlot> _inputs = new();
+        [SerializeReference]
+        private List<ISlot> _outputs = new();
 
         private bool _isExecuted;
+
+        public ReadOnlyCollection<ISlot> Inputs => _inputs.AsReadOnly();
+        public ReadOnlyCollection<ISlot> Outputs => _outputs.AsReadOnly();
+
+        public bool IsExecuted => _isExecuted;
 
         public Action OnExecutionStarted;
         public Action OnExecutionCompleted;
@@ -26,8 +28,7 @@ namespace Misaki.GraphView
 
         public override void Initialize(GraphObject graph)
         {
-            graphObject = graph;
-
+            base.Initialize(graph);
             InitializeSlot();
         }
 
@@ -51,7 +52,7 @@ namespace Misaki.GraphView
                         direction = SlotDirection.Input,
                         valueType = field.FieldType.FullName
                     });
-                    AddSlot(inputSlot);
+                    _inputs.Add(inputSlot);
 
                     continue;
                 }
@@ -67,41 +68,13 @@ namespace Misaki.GraphView
                         direction = SlotDirection.Output,
                         valueType = field.FieldType.FullName
                     });
-                    AddSlot(outputSlot);
+                    _outputs.Add(outputSlot);
                 }
             }
         }
 
         /// <inheritdoc />
-        public void AddSlot(Slot slot)
-        {
-            switch (slot.slotData.direction)
-            {
-                case SlotDirection.Input:
-                    _inputs.Add(slot);
-                    break;
-                case SlotDirection.Output:
-                    _outputs.Add(slot);
-                    break;
-            }
-        }
-
-        /// <inheritdoc />
-        public void RemoveSlot(Slot slot)
-        {
-            switch (slot.slotData.direction)
-            {
-                case SlotDirection.Input:
-                    _inputs.Remove(slot);
-                    break;
-                case SlotDirection.Output:
-                    _outputs.Remove(slot);
-                    break;
-            }
-        }
-
-        /// <inheritdoc />
-        public Slot GetSlot(int index, SlotDirection direction)
+        public ISlot GetSlot(int index, SlotDirection direction)
         {
             return direction switch
             {
@@ -163,11 +136,11 @@ namespace Misaki.GraphView
             OnExecuteFlagCleared?.Invoke();
         }
 
-        protected virtual void OnPullData(Slot input)
+        protected virtual void OnPullData(ISlot input)
         {
         }
 
-        protected virtual void OnPushData(Slot output)
+        protected virtual void OnPushData(ISlot output)
         {
         }
 

@@ -65,7 +65,7 @@ namespace Misaki.GraphView.Editor
 
             if (inputs != null)
             {
-                var inputSlots = (IList<Slot>)inputs.GetValue(_dataNode);
+                var inputSlots = (IList<ISlot>)inputs.GetValue(_dataNode);
 
                 if (inputSlots == null || inputSlots.Count == 0)
                 {
@@ -84,7 +84,7 @@ namespace Misaki.GraphView.Editor
 
             if (outputs != null)
             {
-                var outputSlots = (IList<Slot>)outputs.GetValue(_dataNode);
+                var outputSlots = (IList<ISlot>)outputs.GetValue(_dataNode);
                 if (outputSlots == null || outputSlots.Count == 0)
                 {
                     outputContainer.style.display = DisplayStyle.None;
@@ -163,12 +163,12 @@ namespace Misaki.GraphView.Editor
             RemoveFromClassList("node-execution-failed");
         }
 
-        private void CreateInputPort(Slot slot)
+        private void CreateInputPort(ISlot slot)
         {
-            var valueType = Type.GetType(slot.slotData.valueType);
+            var valueType = Type.GetType(slot.SlotData.valueType);
             var inputPort = Port.Create<Edge>(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, valueType);
 
-            inputPort.portName = ObjectNames.NicifyVariableName(slot.slotData.slotName);
+            inputPort.portName = ObjectNames.NicifyVariableName(slot.SlotData.slotName);
             inputPort.portType = valueType;
             inputPort.userData = slot;
             if (_portColorManager != null && _portColorManager.TryGetColor(valueType, out var portColor))
@@ -180,12 +180,12 @@ namespace Misaki.GraphView.Editor
             _inputPorts.Add(inputPort);
         }
 
-        private void CreateOutputPort(Slot slot)
+        private void CreateOutputPort(ISlot slot)
         {
-            var valueType = Type.GetType(slot.slotData.valueType);
+            var valueType = Type.GetType(slot.SlotData.valueType);
             var outputPort = Port.Create<Edge>(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, valueType);
 
-            outputPort.portName = ObjectNames.NicifyVariableName(slot.slotData.slotName);
+            outputPort.portName = ObjectNames.NicifyVariableName(slot.SlotData.slotName);
             outputPort.portType = valueType;
             outputPort.userData = slot;
             if (_portColorManager != null && _portColorManager.TryGetColor(valueType, out var portColor))
@@ -243,9 +243,10 @@ namespace Misaki.GraphView.Editor
             }
 
             var i = graphObject.Nodes.IndexOf(_dataNode);
+            var nodeProperty = _serializedObject.FindProperty("_nodes")?.GetArrayElementAtIndex(i);
             foreach (var field in fields)
             {
-                var serializedProperty = _serializedObject.FindProperty("_nodes")?.GetArrayElementAtIndex(i)?.FindPropertyRelative(field.Name);
+                var serializedProperty = nodeProperty?.FindPropertyRelative(field.Name);
 
                 if (serializedProperty == null)
                 {
@@ -261,9 +262,9 @@ namespace Misaki.GraphView.Editor
 
                 if (field.GetCustomAttribute<NodeInputAttribute>() is not null)
                 {
-                    if (_dataNode.Inputs.FirstOrDefault(x => x.slotData.slotName == field.Name) is { } inputSlot)
+                    if (_dataNode.Inputs.FirstOrDefault(x => x.SlotData.slotName == field.Name) is { } inputSlot)
                     {
-                        if (inputSlot.LinkedSlotData.Count > 0)
+                        if (inputSlot.LinkedSlotDatas.Count > 0)
                         {
                             root.Add(CreateFieldForConnectedSlot(inputSlot, propertyName));
                             continue;
@@ -280,7 +281,7 @@ namespace Misaki.GraphView.Editor
             return root;
         }
 
-        protected VisualElement CreateFieldForConnectedSlot(Slot slot, string propertyName)
+        protected VisualElement CreateFieldForConnectedSlot(ISlot slot, string propertyName)
         {
             var root = new VisualElement()
             {
@@ -305,7 +306,7 @@ namespace Misaki.GraphView.Editor
             };
             label.AddToClassList("unity-base-field__label");
 
-            var value = new Label($"Connected to {ObjectNames.NicifyVariableName(slot.LinkedSlotData[0].slotName)}");
+            var value = new Label($"Connected to {ObjectNames.NicifyVariableName(slot.LinkedSlotDatas[0].slotName)}");
             value.AddToClassList("unity-base-field__input");
 
             root.Add(label);

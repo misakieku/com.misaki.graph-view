@@ -39,7 +39,7 @@ namespace Misaki.GraphView.Editor
             return nodeView;
         }
 
-        private static Port CreateOutputPort(ExposedProperty property, Slot slot, IPortColorManager portColorManager)
+        private static Port CreateOutputPort(ExposedProperty property, ISlot slot, IPortColorManager portColorManager)
         {
             if (property == null)
             {

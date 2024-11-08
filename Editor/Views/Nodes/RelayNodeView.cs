@@ -53,14 +53,18 @@ namespace Misaki.GraphView.Editor
 
             var input = edge.input;
             var output = edge.output;
-            if (input.userData is Slot inputSlot && output.userData is Slot outputSlot)
+            if (input.userData is ISlot inputSlot && output.userData is ISlot outputSlot)
             {
+                inputSlot.Unlink(outputSlot);
+
                 input.Disconnect(edge);
                 output.Disconnect(edge);
 
+                //_dataNode.BindSlot(inputSlot);
+                //_dataNode.BindSlot(outputSlot);
+
                 inputSlot.Link(_dataNode.GetSlot(0, SlotDirection.Output), out inputConnection);
-                outputSlot.Link(_dataNode.GetSlot(0, SlotDirection.Input), out outputConnection);
-                inputSlot.Unlink(outputSlot);
+                _dataNode.GetSlot(0, SlotDirection.Input).Link(outputSlot, out outputConnection);
 
                 inputEdge = output.ConnectTo(_inputPort);
                 outputEdge = _outputPort.ConnectTo(input);

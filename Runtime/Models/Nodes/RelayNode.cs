@@ -1,22 +1,27 @@
 using System;
+using UnityEngine;
 
 namespace Misaki.GraphView
 {
     [Serializable]
     public class RelayNode : DataNode, ISlotContainer, IExecutable
     {
+        [SerializeField]
         private Slot _inputSlot;
+        [SerializeField]
         private Slot _outputSlot;
 
         private bool _isExecuted;
+
+        public bool IsExecuted => _isExecuted;
 
         public string portValueType;
 
         public override void Initialize(GraphObject graph)
         {
-            graphObject = graph;
+            base.Initialize(graph);
 
-            _inputSlot = new(this, new()
+            _inputSlot = new Slot(this, new SlotData
             {
                 slotName = "Input",
                 nodeID = Id,
@@ -25,7 +30,7 @@ namespace Misaki.GraphView
                 valueType = typeof(object).FullName
             });
 
-            _outputSlot = new(this, new()
+            _outputSlot = new Slot(this, new SlotData
             {
                 slotName = "Output",
                 nodeID = Id,
@@ -37,15 +42,24 @@ namespace Misaki.GraphView
             portValueType = typeof(object).FullName;
         }
 
-        public void AddSlot(Slot slot)
-        {
-        }
+        ///// <summary>
+        ///// Bind the slot to the relay node.
+        ///// </summary>
+        ///// <param name="slot"> <see cref="ISlot"/> The slot want to bind to current relay node </param>
+        //public void BindSlot(ISlot slot)
+        //{
+        //    switch (slot.SlotData.direction)
+        //    {
+        //        case SlotDirection.Input:
+        //            _inputSlot.Bind(slot);
+        //            break;
+        //        case SlotDirection.Output:
+        //            _outputSlot.Bind(slot);
+        //            break;
+        //    }
+        //}
 
-        public void RemoveSlot(Slot slot)
-        {
-        }
-
-        public Slot GetSlot(int index, SlotDirection direction)
+        public ISlot GetSlot(int index, SlotDirection direction)
         {
             return direction switch
             {
@@ -68,13 +82,8 @@ namespace Misaki.GraphView
                 return;
             }
 
-            var connectedOutputNode = graphObject.GetNode(_inputSlot.LinkedSlotData[0].nodeID);
-            if (connectedOutputNode is IExecutable executable)
-            {
-                executable.Execute();
-            }
-
-            _outputSlot.ReceiveData(_inputSlot.value);
+            _inputSlot.PullData(null);
+            _outputSlot.ReceiveData(_inputSlot.Data);
             _outputSlot.PushData(null);
 
             _isExecuted = true;

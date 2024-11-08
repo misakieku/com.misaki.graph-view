@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using UnityEngine;
 
 namespace Misaki.GraphView
@@ -41,57 +40,61 @@ namespace Misaki.GraphView
     }
 
     [Serializable]
-    public class Slot
+    public class Slot : ISlot
     {
         [SerializeField]
+        private SlotData _slotData;
+        [SerializeField]
         private List<SlotData> _linkedSlotData = new();
-
-        public ReadOnlyCollection<SlotData> LinkedSlotData => _linkedSlotData.AsReadOnly();
-
         [SerializeReference]
-        public DataNode owner;
-        public SlotData slotData;
+        private DataNode _owner;
 
-        public object value;
+        private object _data;
+
+        public SlotData SlotData => _slotData;
+        public List<SlotData> LinkedSlotDatas => _linkedSlotData;
+        public bool IsLinked => _linkedSlotData.Count > 0;
+        public DataNode Owner => _owner;
+        public object Data => _data;
 
         public Slot(DataNode owner, SlotData slotData)
         {
-            this.owner = owner;
-            this.slotData = slotData;
+            _owner = owner;
+            _slotData = slotData;
         }
 
-        /// <summary>
-        /// Link the current slot with another slot.
-        /// </summary>
-        /// <param name="other"> The slot need to be linked </param>
-        public bool Link(Slot other, out SlotConnection connection)
+        /// <inheritdoc/>
+        public bool Link(ISlot other, out SlotConnection connection)
         {
             connection = default;
-            if (other.slotData.direction == slotData.direction)
+            if (other.SlotData.direction == _slotData.direction)
             {
                 return false;
             }
 
-            if (_linkedSlotData.Contains(other.slotData))
+            if (_linkedSlotData.Contains(other.SlotData))
             {
                 return false;
             }
 
-            _linkedSlotData.Add(other.slotData);
-            other._linkedSlotData.Add(slotData);
-            connection = new(slotData, other.slotData);
+            _linkedSlotData.Add(other.SlotData);
+            other.LinkedSlotDatas.Add(_slotData);
+            connection = new(_slotData, other.SlotData);
 
             return true;
         }
 
-        /// <summary>
-        /// Unlink the current slot with another slot.
-        /// </summary>
-        /// <param name="other"> The slot need to be unlinked </param>
-        public void Unlink(Slot other)
+        /// <inheritdoc/>
+        public void Unlink(ISlot other)
         {
-            _linkedSlotData.Remove(other.slotData);
-            other._linkedSlotData.Remove(slotData);
+            _linkedSlotData.Remove(other.SlotData);
+            other.LinkedSlotDatas.Remove(_slotData);
+        }
+
+        /// <inheritdoc/>
+        public void ReceiveData(object data)
+        {
+            _data = data;
         }
     }
 }

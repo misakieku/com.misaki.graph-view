@@ -5,7 +5,7 @@ using Misaki.GraphView.Editor;
 namespace Misaki.GraphView.Sample
 {
     [NodeInfo("Add", "Math")]
-    public class Add : BackTraceExecutableNode
+    public class Add : ExecutableNode
     {
         [NodeInput]
 #if UNITY_EDITOR
@@ -19,7 +19,7 @@ namespace Misaki.GraphView.Sample
 #endif
         public float b;
 
-        [NodeOutput] 
+        [NodeOutput]
         private float _result;
 
         protected override bool OnExecute()

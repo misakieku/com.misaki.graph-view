@@ -109,16 +109,16 @@ namespace Misaki.GraphView
             _connections.Remove(connection);
         }
 
-        public void RemoveAllConnectionsForSlot(Slot slot)
+        public void RemoveAllConnectionsForSlot(ISlot slot)
         {
             _connections.RemoveAll(connection =>
-                connection.InputSlotData == slot.slotData || connection.OutputSlotData == slot.slotData);
+                connection.InputSlotData == slot.SlotData || connection.OutputSlotData == slot.SlotData);
         }
 
-        public SlotConnection TryGetConnection(Slot input, Slot output)
+        public SlotConnection TryGetConnection(ISlot input, ISlot output)
         {
             return _connections.FirstOrDefault(connection =>
-                connection.InputSlotData == input.slotData && connection.OutputSlotData == output.slotData);
+                connection.InputSlotData == input.SlotData && connection.OutputSlotData == output.SlotData);
         }
 
         public void AddExposedProperty(ExposedProperty property)
