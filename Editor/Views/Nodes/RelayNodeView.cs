@@ -81,11 +81,6 @@ namespace Misaki.GraphView.Editor
             newConnections = new List<SlotConnection>();
             newEdges = new List<Edge>();
 
-            if (_inputPort.userData is not ProxySlot inputSlot || _outputPort.userData is not ProxySlot outputSlot)
-            {
-                return;
-            }
-
             var linkedOutputPort = _inputPort.connections.FirstOrDefault()?.output;
 
             if (linkedOutputPort == null)
@@ -93,9 +88,7 @@ namespace Misaki.GraphView.Editor
                 return;
             }
 
-            inputSlot.MasterSlot.Unlink(outputSlot.MasterSlot);
-
-            foreach (var edge in _outputPort.connections.ToList())
+            foreach (var edge in _outputPort.connections)
             {
                 var linkedInputPort = edge.input;
                 if (linkedOutputPort.userData is ISlot linkedOutputSlot && linkedInputPort.userData is ISlot linkedInputSlot)
@@ -105,9 +98,6 @@ namespace Misaki.GraphView.Editor
                     newEdges.Add(linkedOutputPort.ConnectTo(linkedInputPort));
                 }
             }
-
-            inputSlot.UnlinkAll();
-            outputSlot.UnlinkAll();
 
             _inputPort.DisconnectAll();
             _outputPort.DisconnectAll();

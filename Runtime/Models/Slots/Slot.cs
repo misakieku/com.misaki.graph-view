@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Misaki.GraphView
 {
@@ -9,16 +10,16 @@ namespace Misaki.GraphView
     {
         [SerializeField]
         private SlotData _slotData;
-        [SerializeField]
-        private List<SlotData> _linkedSlotDatas = new();
+        [FormerlySerializedAs("_linkedSlotDatas")] [SerializeField]
+        private List<SlotData> _linkedSlotData = new();
         [SerializeReference]
         private DataNode _owner;
 
         private object _data;
 
         public SlotData SlotData => _slotData;
-        public List<SlotData> LinkedSlotDatas => _linkedSlotDatas;
-        public bool IsLinked => _linkedSlotDatas.Count > 0;
+        public List<SlotData> LinkedSlotData => _linkedSlotData;
+        public bool IsLinked => _linkedSlotData.Count > 0;
         public DataNode Owner => _owner;
         public object Data => _data;
 
@@ -34,13 +35,13 @@ namespace Misaki.GraphView
             connection = new(_slotData, other.SlotData);
 
             if (other.SlotData.direction == _slotData.direction ||
-                _linkedSlotDatas.Contains(other.SlotData))
+                _linkedSlotData.Contains(other.SlotData))
             {
                 return false;
             }
 
-            _linkedSlotDatas.Add(other.SlotData);
-            other.LinkedSlotDatas.Add(_slotData);
+            _linkedSlotData.Add(other.SlotData);
+            other.LinkedSlotData.Add(_slotData);
 
             return true;
         }
@@ -48,8 +49,8 @@ namespace Misaki.GraphView
         /// <inheritdoc/>
         public void Unlink(ISlot other)
         {
-            _linkedSlotDatas.Remove(other.SlotData);
-            other.LinkedSlotDatas.Remove(_slotData);
+            _linkedSlotData.Remove(other.SlotData);
+            other.LinkedSlotData.Remove(_slotData);
         }
 
         /// <inheritdoc/>
@@ -84,7 +85,7 @@ namespace Misaki.GraphView
 
             OnPushData?.Invoke(this);
 
-            foreach (var connectedSlotData in _linkedSlotDatas)
+            foreach (var connectedSlotData in _linkedSlotData)
             {
                 var node = _owner.GraphObject.GetNode(connectedSlotData.nodeID);
                 if (node is not ISlotContainer slotContainer)

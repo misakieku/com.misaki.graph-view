@@ -65,8 +65,8 @@ namespace Misaki.GraphView.Editor
         {
             Undo.RecordObject(_graphObject, $"Remove {dataNode.GetType().Name}");
 
-            RemoveNodeView(dataNode);
             _graphObject.RemoveNode(dataNode);
+            RemoveNodeView(dataNode);
 
             EditorUtility.SetDirty(_graphObject);
         }

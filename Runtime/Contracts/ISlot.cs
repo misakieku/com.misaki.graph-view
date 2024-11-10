@@ -16,7 +16,7 @@ namespace Misaki.GraphView
         /// <summary>
         /// The linked slot datas.
         /// </summary>
-        public List<SlotData> LinkedSlotDatas
+        public List<SlotData> LinkedSlotData
         {
             get;
         }

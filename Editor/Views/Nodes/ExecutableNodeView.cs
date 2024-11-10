@@ -264,7 +264,7 @@ namespace Misaki.GraphView.Editor
                 {
                     if (_dataNode.Inputs.FirstOrDefault(x => x.SlotData.slotName == field.Name) is { } inputSlot)
                     {
-                        if (inputSlot.LinkedSlotDatas.Count > 0)
+                        if (inputSlot.LinkedSlotData.Count > 0)
                         {
                             root.Add(CreateFieldForConnectedSlot(inputSlot, propertyName));
                             continue;
@@ -306,7 +306,7 @@ namespace Misaki.GraphView.Editor
             };
             label.AddToClassList("unity-base-field__label");
 
-            var value = new Label($"Connected to {ObjectNames.NicifyVariableName(slot.LinkedSlotDatas[0].slotName)}");
+            var value = new Label($"Connected to {ObjectNames.NicifyVariableName(slot.LinkedSlotData[0].slotName)}");
             value.AddToClassList("unity-base-field__input");
 
             root.Add(label);

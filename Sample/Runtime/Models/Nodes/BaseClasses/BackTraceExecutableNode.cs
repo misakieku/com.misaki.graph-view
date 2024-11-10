@@ -4,15 +4,13 @@ namespace Misaki.GraphView.Sample
     {
         protected override void OnPullData(ISlot input)
         {
-            if (input.LinkedSlotDatas.Count == 0)
+            foreach (var linkedSlotData in input.LinkedSlotData)
             {
-                return;
-            }
-
-            var outputNode = GraphObject.GetNode(input.LinkedSlotDatas[0].nodeID);
-            if (outputNode is IExecutable executable)
-            {
-                executable.Execute();
+                var outputNode = GraphObject.GetNode(linkedSlotData.nodeID);
+                if (outputNode is IExecutable executable)
+                {
+                    executable.Execute();
+                }
             }
         }
     }

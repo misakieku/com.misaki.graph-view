@@ -15,35 +15,23 @@ MonoBehaviour:
   _nodes:
   - rid: 299037684865171562
   - rid: 299037684865171566
-  - rid: 299037684865171575
   _stickyNotes: []
   _connections:
   - _inputSlotData:
-      slotName: _input
-      nodeID: 79330303-2194-47fc-a59f-509ea2101a57
-      slotIndex: 0
-      direction: 0
-      valueType: System.Single
-    _outputSlotData:
-      slotName: Output
-      nodeID: 067bd91d-b0d8-4195-afd2-abfaee6d3097
-      slotIndex: 0
-      direction: 1
-      valueType: System.Single
-  - _inputSlotData:
-      slotName: Input
-      nodeID: 067bd91d-b0d8-4195-afd2-abfaee6d3097
-      slotIndex: 0
-      direction: 0
-      valueType: System.Single
-    _outputSlotData:
       slotName: _result
       nodeID: fb4f0b75-0e99-4374-8856-cf9d9dee5c4e
       slotIndex: 0
       direction: 1
       valueType: System.Single
+    _outputSlotData:
+      slotName: _input
+      nodeID: 79330303-2194-47fc-a59f-509ea2101a57
+      slotIndex: 0
+      direction: 0
+      valueType: System.Single
   _exposedProperties: []
-  graphPosition: {x: -122.666664, y: 15.333333, z: 0}
+  nodeGroupDatas: []
+  graphPosition: {x: -66, y: 2, z: 0}
   graphScale: {x: 1, y: 1, z: 1}
   references:
     version: 2
@@ -55,9 +43,9 @@ MonoBehaviour:
         id: fb4f0b75-0e99-4374-8856-cf9d9dee5c4e
         position:
           serializedVersion: 2
-          x: 438.66666
+          x: 439.3333
           y: 475.99997
-          width: 117.33331
+          width: 117.33334
           height: 102.66669
         _inputs:
         - rid: 299037684865171563
@@ -65,7 +53,7 @@ MonoBehaviour:
         _outputs:
         - rid: 299037684865171565
         a: 1
-        b: 1
+        b: 2
     - rid: 299037684865171563
       type: {class: Slot, ns: Misaki.GraphView, asm: GraphView}
       data:
@@ -75,7 +63,7 @@ MonoBehaviour:
           slotIndex: 0
           direction: 0
           valueType: System.Single
-        _linkedSlotDatas: []
+        _linkedSlotData: []
         _owner:
           rid: 299037684865171562
     - rid: 299037684865171564
@@ -87,7 +75,7 @@ MonoBehaviour:
           slotIndex: 1
           direction: 0
           valueType: System.Single
-        _linkedSlotDatas: []
+        _linkedSlotData: []
         _owner:
           rid: 299037684865171562
     - rid: 299037684865171565
@@ -99,7 +87,7 @@ MonoBehaviour:
           slotIndex: 0
           direction: 1
           valueType: System.Single
-        _linkedSlotDatas:
+        _linkedSlotData:
         - slotName: _input
           nodeID: 79330303-2194-47fc-a59f-509ea2101a57
           slotIndex: 0
@@ -130,7 +118,7 @@ MonoBehaviour:
           slotIndex: 0
           direction: 0
           valueType: System.Single
-        _linkedSlotDatas:
+        _linkedSlotData:
         - slotName: _result
           nodeID: fb4f0b75-0e99-4374-8856-cf9d9dee5c4e
           slotIndex: 0
@@ -138,44 +126,3 @@ MonoBehaviour:
           valueType: System.Single
         _owner:
           rid: 299037684865171566
-    - rid: 299037684865171575
-      type: {class: RelayNode, ns: Misaki.GraphView, asm: GraphView}
-      data:
-        graphObject: {fileID: 11400000}
-        id: 067bd91d-b0d8-4195-afd2-abfaee6d3097
-        position:
-          serializedVersion: 2
-          x: 788.6667
-          y: 521.3334
-          width: 74.66669
-          height: 33.333313
-        _inputSlot:
-          _masterSlot:
-            rid: 299037684865171567
-          _slotData:
-            slotName: Input
-            nodeID: 067bd91d-b0d8-4195-afd2-abfaee6d3097
-            slotIndex: 0
-            direction: 0
-            valueType: System.Single
-          _linkedSlotDatas:
-          - slotName: _result
-            nodeID: fb4f0b75-0e99-4374-8856-cf9d9dee5c4e
-            slotIndex: 0
-            direction: 1
-            valueType: System.Single
-          _owner:
-            rid: 299037684865171575
-        _outputSlot:
-          _masterSlot:
-            rid: 299037684865171565
-          _slotData:
-            slotName: Output
-            nodeID: 067bd91d-b0d8-4195-afd2-abfaee6d3097
-            slotIndex: 0
-            direction: 1
-            valueType: System.Single
-          _linkedSlotDatas: []
-          _owner:
-            rid: 299037684865171575
-        portValueType: System.Single

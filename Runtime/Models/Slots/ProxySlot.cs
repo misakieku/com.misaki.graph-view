@@ -12,14 +12,14 @@ namespace Misaki.GraphView
 
         [SerializeField]
         private SlotData _slotData;
-        [SerializeField]
-        private List<SlotData> _linkedSlotDatas = new();
+        //[SerializeField]
+        //private List<SlotData> _linkedSlotData = new();
         [SerializeReference]
         private DataNode _owner;
 
         public SlotData SlotData => _slotData;
-        public List<SlotData> LinkedSlotDatas => _linkedSlotDatas;
-        public bool IsLinked => _linkedSlotDatas.Count > 0;
+        public List<SlotData> LinkedSlotData => _masterSlot?.LinkedSlotData;
+        public bool IsLinked => _masterSlot?.IsLinked ?? false;
         public DataNode Owner => _owner;
 
         public ISlot MasterSlot => _masterSlot;
@@ -49,19 +49,19 @@ namespace Misaki.GraphView
             connection = new(_slotData, other.SlotData);
 
             if (other.SlotData.direction == _slotData.direction ||
-                _linkedSlotDatas.Contains(other.SlotData) ||
+                //_linkedSlotData.Contains(other.SlotData) ||
                 _masterSlot == null)
             {
                 return false;
             }
 
-            _linkedSlotDatas.Add(other.SlotData);
+            //_linkedSlotData.Add(other.SlotData);
             return _masterSlot.Link(other, out _);
         }
 
         public void Unlink(ISlot other)
         {
-            _linkedSlotDatas.Remove(other.SlotData);
+            //_linkedSlotData.Remove(other.SlotData);
             _masterSlot?.Unlink(other);
         }
 

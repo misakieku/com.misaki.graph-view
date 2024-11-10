@@ -11,10 +11,10 @@ namespace Misaki.GraphView
         /// <param name="slot">The slot to unlink all connections from.</param>
         public static void UnlinkAll(this ISlot slot)
         {
-            var slotCount = slot.LinkedSlotDatas.Count;
-            for (var i = 0; i < slotCount; i++)
+            var slotCount = slot.LinkedSlotData.Count;
+            for (var i = slotCount - 1; i >= 0; i--)
             {
-                var other = slot.LinkedSlotDatas[i];
+                var other = slot.LinkedSlotData[i];
                 var otherNode = slot.Owner.GraphObject.GetNode(other.nodeID);
 
                 if (otherNode is ISlotContainer slotContainer)
