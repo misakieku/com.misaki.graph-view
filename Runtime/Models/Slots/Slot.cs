@@ -5,55 +5,20 @@ using UnityEngine;
 namespace Misaki.GraphView
 {
     [Serializable]
-    public struct SlotData : IEquatable<SlotData>
-    {
-        public string slotName;
-        public string nodeID;
-        public int slotIndex;
-        public SlotDirection direction;
-        public string valueType;
-
-        public bool Equals(SlotData other)
-        {
-            return slotName == other.slotName && nodeID == other.nodeID && slotIndex == other.slotIndex && direction == other.direction && valueType == other.valueType;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is SlotData other && Equals(other);
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(slotName, nodeID, slotIndex, direction, valueType);
-        }
-
-        public static bool operator ==(SlotData left, SlotData right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(SlotData left, SlotData right)
-        {
-            return !left.Equals(right);
-        }
-    }
-
-    [Serializable]
     public class Slot : ISlot
     {
         [SerializeField]
         private SlotData _slotData;
         [SerializeField]
-        private List<SlotData> _linkedSlotData = new();
+        private List<SlotData> _linkedSlotDatas = new();
         [SerializeReference]
         private DataNode _owner;
 
         private object _data;
 
         public SlotData SlotData => _slotData;
-        public List<SlotData> LinkedSlotDatas => _linkedSlotData;
-        public bool IsLinked => _linkedSlotData.Count > 0;
+        public List<SlotData> LinkedSlotDatas => _linkedSlotDatas;
+        public bool IsLinked => _linkedSlotDatas.Count > 0;
         public DataNode Owner => _owner;
         public object Data => _data;
 
@@ -66,20 +31,16 @@ namespace Misaki.GraphView
         /// <inheritdoc/>
         public bool Link(ISlot other, out SlotConnection connection)
         {
-            connection = default;
-            if (other.SlotData.direction == _slotData.direction)
-            {
-                return false;
-            }
-
-            if (_linkedSlotData.Contains(other.SlotData))
-            {
-                return false;
-            }
-
-            _linkedSlotData.Add(other.SlotData);
-            other.LinkedSlotDatas.Add(_slotData);
             connection = new(_slotData, other.SlotData);
+
+            if (other.SlotData.direction == _slotData.direction ||
+                _linkedSlotDatas.Contains(other.SlotData))
+            {
+                return false;
+            }
+
+            _linkedSlotDatas.Add(other.SlotData);
+            other.LinkedSlotDatas.Add(_slotData);
 
             return true;
         }
@@ -87,8 +48,67 @@ namespace Misaki.GraphView
         /// <inheritdoc/>
         public void Unlink(ISlot other)
         {
-            _linkedSlotData.Remove(other.SlotData);
+            _linkedSlotDatas.Remove(other.SlotData);
             other.LinkedSlotDatas.Remove(_slotData);
+        }
+
+        /// <inheritdoc/>
+        public void PullData(Action<ISlot> OnPullData)
+        {
+            if (_slotData.direction == SlotDirection.Output)
+            {
+                return;
+            }
+
+            OnPullData?.Invoke(this);
+
+            var property = _owner.GetType().GetField(_slotData.slotName, ConstResource.NODE_FIELD_BINDING_FLAGS);
+            if (IsLinked && property != null)
+            {
+                property?.SetValue(_owner, _data);
+            }
+        }
+
+        public void PushData(Action<ISlot> OnPushData)
+        {
+            if (_slotData.direction == SlotDirection.Input)
+            {
+                return;
+            }
+
+            var property = _owner.GetType().GetField(_slotData.slotName, ConstResource.NODE_FIELD_BINDING_FLAGS);
+            if (property != null)
+            {
+                ReceiveData(property.GetValue(_owner));
+            }
+
+            OnPushData?.Invoke(this);
+
+            foreach (var connectedSlotData in _linkedSlotDatas)
+            {
+                var node = _owner.GraphObject.GetNode(connectedSlotData.nodeID);
+                if (node is not ISlotContainer slotContainer)
+                {
+                    continue;
+                }
+
+                var connectedSlot = slotContainer.GetSlot(connectedSlotData.slotIndex, connectedSlotData.direction);
+
+                if (connectedSlotData.GetValueType() == _slotData.GetValueType() || _slotData.GetValueType() == typeof(object) || connectedSlotData.GetValueType() == typeof(object))
+                {
+                    connectedSlot.ReceiveData(_data);
+                }
+                else if (_owner.GraphObject.ValueConverterManager != null && _owner.GraphObject.ValueConverterManager.TryConvert(_slotData.GetValueType(),
+                             connectedSlotData.GetValueType(), _data, out var data))
+                {
+                    connectedSlot.ReceiveData(data);
+                }
+                else
+                {
+                    _owner.GraphObject.Logger?.LogError(_owner, $"Failed to convert value from {_slotData.valueType} to {connectedSlotData.valueType}");
+                    _owner.GraphObject.GraphProcessor.Break();
+                }
+            }
         }
 
         /// <inheritdoc/>

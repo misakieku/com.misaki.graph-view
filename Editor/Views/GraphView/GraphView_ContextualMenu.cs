@@ -40,6 +40,14 @@ namespace Misaki.GraphView.Editor
                     AddRelayNode(relayNode, edge);
                 }, DropdownMenuAction.AlwaysEnabled);
             }
+
+            if (selection.Count > 0)
+            {
+                evt.menu.AppendAction("Group Selected Nodes", e =>
+                {
+
+                }, DropdownMenuAction.AlwaysEnabled);
+            }
         }
     }
 }

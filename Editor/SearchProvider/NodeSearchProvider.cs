@@ -11,8 +11,14 @@ namespace Misaki.GraphView.Editor
 {
     public struct SearchContextElement
     {
-        public object Target { get; }
-        public string Title { get; }
+        public object Target
+        {
+            get;
+        }
+        public string Title
+        {
+            get;
+        }
 
         public SearchContextElement(object target, string title)
         {
@@ -26,7 +32,7 @@ namespace Misaki.GraphView.Editor
         //public VisualElement nodeCreationView;
         private readonly List<SearchContextElement> _searchContextElements = new();
         private GraphView _owner;
-        
+
         public void SetOwner(GraphView owner)
         {
             _owner = owner;
@@ -38,7 +44,7 @@ namespace Misaki.GraphView.Editor
             {
                 return null;
             }
-            
+
             var tree = new List<SearchTreeEntry>
             {
                 // The first entry is the main group, which will be shown as title of the search window
@@ -47,8 +53,8 @@ namespace Misaki.GraphView.Editor
 
             _searchContextElements.Clear();
 
-            var types = string.IsNullOrEmpty(_owner.GraphViewConfig.searchNamespace) ? 
-                TypeCache.GetTypesDerivedFrom<ExecutableNode>().ToArray() : 
+            var types = string.IsNullOrEmpty(_owner.GraphViewConfig.searchNamespace) ?
+                TypeCache.GetTypesDerivedFrom<ExecutableNode>().ToArray() :
                 TypeCache.GetTypesDerivedFrom<ExecutableNode>().Where(t => !string.IsNullOrEmpty(t.Namespace) && t.Namespace.StartsWith(_owner.GraphViewConfig.searchNamespace)).ToArray();
 
             foreach (var type in types)
@@ -156,10 +162,11 @@ namespace Misaki.GraphView.Editor
             {
                 return false;
             }
-            
+
             node.position = new Rect(graphMousePosition, Vector2.zero);
             _owner.AddNode(node);
-            
+            _owner.GraphViewConfig.serializedObject.Update();
+
             return true;
         }
     }

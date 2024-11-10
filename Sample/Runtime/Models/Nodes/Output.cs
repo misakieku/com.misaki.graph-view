@@ -1,7 +1,7 @@
 namespace Misaki.GraphView.Sample
 {
     [NodeInfo("Output Node", "Output")]
-    public class Output : ExecutableNode
+    public class Output : BackTraceExecutableNode
     {
         [NodeInput]
         private float _input;

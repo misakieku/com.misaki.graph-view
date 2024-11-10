@@ -2,6 +2,9 @@
 {
     public interface IExecutable
     {
+        /// <summary>
+        /// Check if the node is executed.
+        /// </summary>
         public bool IsExecuted
         {
             get;

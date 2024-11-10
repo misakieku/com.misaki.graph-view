@@ -60,10 +60,13 @@ namespace Misaki.GraphView.Editor
                 input.Disconnect(edge);
                 output.Disconnect(edge);
 
-                //_dataNode.BindSlot(inputSlot);
-                //_dataNode.BindSlot(outputSlot);
+                _dataNode.BindSlot(inputSlot);
+                _dataNode.BindSlot(outputSlot);
 
-                inputSlot.Link(_dataNode.GetSlot(0, SlotDirection.Output), out inputConnection);
+                var outputProxySlot = (ProxySlot)_dataNode.GetSlot(0, SlotDirection.Output);
+                inputSlot.Link(outputProxySlot.MasterSlot, out _);
+                inputConnection = new(inputSlot.SlotData, outputProxySlot.SlotData);
+
                 _dataNode.GetSlot(0, SlotDirection.Input).Link(outputSlot, out outputConnection);
 
                 inputEdge = output.ConnectTo(_inputPort);
@@ -78,17 +81,24 @@ namespace Misaki.GraphView.Editor
             newConnections = new List<SlotConnection>();
             newEdges = new List<Edge>();
 
-            if (_inputPort.userData is not Slot inputSlot || _outputPort.userData is not Slot outputSlot)
+            if (_inputPort.userData is not ProxySlot inputSlot || _outputPort.userData is not ProxySlot outputSlot)
             {
                 return;
             }
 
-            var linkedOutputPort = _inputPort.connections.FirstOrDefault().output;
+            var linkedOutputPort = _inputPort.connections.FirstOrDefault()?.output;
+
+            if (linkedOutputPort == null)
+            {
+                return;
+            }
+
+            inputSlot.MasterSlot.Unlink(outputSlot.MasterSlot);
 
             foreach (var edge in _outputPort.connections.ToList())
             {
                 var linkedInputPort = edge.input;
-                if (linkedOutputPort.userData is Slot linkedOutputSlot && linkedInputPort.userData is Slot linkedInputSlot)
+                if (linkedOutputPort.userData is ISlot linkedOutputSlot && linkedInputPort.userData is ISlot linkedInputSlot)
                 {
                     linkedOutputSlot.Link(linkedInputSlot, out var inputConnection);
                     newConnections.Add(inputConnection);

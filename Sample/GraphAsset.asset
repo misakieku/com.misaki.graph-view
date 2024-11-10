@@ -13,170 +13,169 @@ MonoBehaviour:
   m_Name: GraphAsset
   m_EditorClassIdentifier: 
   _nodes:
-  - rid: 299037664908935259
-  - rid: 299037664908935263
-  - rid: 299037666265792792
+  - rid: 299037684865171562
+  - rid: 299037684865171566
+  - rid: 299037684865171575
   _stickyNotes: []
   _connections:
   - _inputSlotData:
       slotName: _input
-      nodeID: beccbada-5a7c-4804-a24d-d88417579758
+      nodeID: 79330303-2194-47fc-a59f-509ea2101a57
       slotIndex: 0
       direction: 0
       valueType: System.Single
     _outputSlotData:
       slotName: Output
-      nodeID: 37104284-ca2e-4e27-b71b-ab692270407a
+      nodeID: 067bd91d-b0d8-4195-afd2-abfaee6d3097
       slotIndex: 0
       direction: 1
-      valueType: System.Object
+      valueType: System.Single
   - _inputSlotData:
       slotName: Input
-      nodeID: 37104284-ca2e-4e27-b71b-ab692270407a
+      nodeID: 067bd91d-b0d8-4195-afd2-abfaee6d3097
       slotIndex: 0
       direction: 0
-      valueType: System.Object
+      valueType: System.Single
     _outputSlotData:
       slotName: _result
-      nodeID: 9c9e190e-4658-4c0f-8c6d-93e99cc6326b
+      nodeID: fb4f0b75-0e99-4374-8856-cf9d9dee5c4e
       slotIndex: 0
       direction: 1
       valueType: System.Single
   _exposedProperties: []
-  graphPosition: {x: 82.666664, y: 8.666667, z: 0}
+  graphPosition: {x: -122.666664, y: 15.333333, z: 0}
   graphScale: {x: 1, y: 1, z: 1}
   references:
     version: 2
     RefIds:
-    - rid: 299037664908935259
+    - rid: 299037684865171562
       type: {class: Add, ns: Misaki.GraphView.Sample, asm: GraphView.Sample}
       data:
         graphObject: {fileID: 11400000}
-        id: 9c9e190e-4658-4c0f-8c6d-93e99cc6326b
+        id: fb4f0b75-0e99-4374-8856-cf9d9dee5c4e
         position:
           serializedVersion: 2
-          x: 502.66666
-          y: 447.3333
-          width: 116.66669
-          height: 102.66666
+          x: 438.66666
+          y: 475.99997
+          width: 117.33331
+          height: 102.66669
         _inputs:
-        - rid: 299037664908935260
-        - rid: 299037664908935261
+        - rid: 299037684865171563
+        - rid: 299037684865171564
         _outputs:
-        - rid: 299037664908935262
+        - rid: 299037684865171565
         a: 1
-        b: 3
-    - rid: 299037664908935260
+        b: 1
+    - rid: 299037684865171563
       type: {class: Slot, ns: Misaki.GraphView, asm: GraphView}
       data:
         _slotData:
           slotName: a
-          nodeID: 9c9e190e-4658-4c0f-8c6d-93e99cc6326b
+          nodeID: fb4f0b75-0e99-4374-8856-cf9d9dee5c4e
           slotIndex: 0
           direction: 0
           valueType: System.Single
-        _linkedSlotData: []
+        _linkedSlotDatas: []
         _owner:
-          rid: 299037664908935259
-    - rid: 299037664908935261
+          rid: 299037684865171562
+    - rid: 299037684865171564
       type: {class: Slot, ns: Misaki.GraphView, asm: GraphView}
       data:
         _slotData:
           slotName: b
-          nodeID: 9c9e190e-4658-4c0f-8c6d-93e99cc6326b
+          nodeID: fb4f0b75-0e99-4374-8856-cf9d9dee5c4e
           slotIndex: 1
           direction: 0
           valueType: System.Single
-        _linkedSlotData: []
+        _linkedSlotDatas: []
         _owner:
-          rid: 299037664908935259
-    - rid: 299037664908935262
+          rid: 299037684865171562
+    - rid: 299037684865171565
       type: {class: Slot, ns: Misaki.GraphView, asm: GraphView}
       data:
         _slotData:
           slotName: _result
-          nodeID: 9c9e190e-4658-4c0f-8c6d-93e99cc6326b
+          nodeID: fb4f0b75-0e99-4374-8856-cf9d9dee5c4e
           slotIndex: 0
           direction: 1
           valueType: System.Single
-        _linkedSlotData:
-        - slotName: Input
-          nodeID: 37104284-ca2e-4e27-b71b-ab692270407a
+        _linkedSlotDatas:
+        - slotName: _input
+          nodeID: 79330303-2194-47fc-a59f-509ea2101a57
           slotIndex: 0
           direction: 0
-          valueType: System.Object
+          valueType: System.Single
         _owner:
-          rid: 299037664908935259
-    - rid: 299037664908935263
+          rid: 299037684865171562
+    - rid: 299037684865171566
       type: {class: Output, ns: Misaki.GraphView.Sample, asm: GraphView.Sample}
       data:
         graphObject: {fileID: 11400000}
-        id: beccbada-5a7c-4804-a24d-d88417579758
+        id: 79330303-2194-47fc-a59f-509ea2101a57
         position:
           serializedVersion: 2
-          x: 791.3334
-          y: 447.3333
+          x: 1124.6666
+          y: 475.99997
           width: 124.666626
-          height: 78.66666
+          height: 78.66669
         _inputs:
-        - rid: 299037664908935264
+        - rid: 299037684865171567
         _outputs: []
-    - rid: 299037664908935264
+    - rid: 299037684865171567
       type: {class: Slot, ns: Misaki.GraphView, asm: GraphView}
       data:
         _slotData:
           slotName: _input
-          nodeID: beccbada-5a7c-4804-a24d-d88417579758
+          nodeID: 79330303-2194-47fc-a59f-509ea2101a57
           slotIndex: 0
           direction: 0
           valueType: System.Single
-        _linkedSlotData:
-        - slotName: Output
-          nodeID: 37104284-ca2e-4e27-b71b-ab692270407a
+        _linkedSlotDatas:
+        - slotName: _result
+          nodeID: fb4f0b75-0e99-4374-8856-cf9d9dee5c4e
           slotIndex: 0
           direction: 1
-          valueType: System.Object
+          valueType: System.Single
         _owner:
-          rid: 299037664908935263
-    - rid: 299037666265792792
+          rid: 299037684865171566
+    - rid: 299037684865171575
       type: {class: RelayNode, ns: Misaki.GraphView, asm: GraphView}
       data:
         graphObject: {fileID: 11400000}
-        id: 37104284-ca2e-4e27-b71b-ab692270407a
+        id: 067bd91d-b0d8-4195-afd2-abfaee6d3097
         position:
           serializedVersion: 2
-          x: 660.6667
-          y: 492.66666
+          x: 788.6667
+          y: 521.3334
           width: 74.66669
           height: 33.333313
         _inputSlot:
+          _masterSlot:
+            rid: 299037684865171567
           _slotData:
             slotName: Input
-            nodeID: 37104284-ca2e-4e27-b71b-ab692270407a
+            nodeID: 067bd91d-b0d8-4195-afd2-abfaee6d3097
             slotIndex: 0
             direction: 0
-            valueType: System.Object
-          _linkedSlotData:
+            valueType: System.Single
+          _linkedSlotDatas:
           - slotName: _result
-            nodeID: 9c9e190e-4658-4c0f-8c6d-93e99cc6326b
+            nodeID: fb4f0b75-0e99-4374-8856-cf9d9dee5c4e
             slotIndex: 0
             direction: 1
             valueType: System.Single
           _owner:
-            rid: 299037666265792792
+            rid: 299037684865171575
         _outputSlot:
+          _masterSlot:
+            rid: 299037684865171565
           _slotData:
             slotName: Output
-            nodeID: 37104284-ca2e-4e27-b71b-ab692270407a
+            nodeID: 067bd91d-b0d8-4195-afd2-abfaee6d3097
             slotIndex: 0
             direction: 1
-            valueType: System.Object
-          _linkedSlotData:
-          - slotName: _input
-            nodeID: beccbada-5a7c-4804-a24d-d88417579758
-            slotIndex: 0
-            direction: 0
             valueType: System.Single
+          _linkedSlotDatas: []
           _owner:
-            rid: 299037666265792792
+            rid: 299037684865171575
         portValueType: System.Single

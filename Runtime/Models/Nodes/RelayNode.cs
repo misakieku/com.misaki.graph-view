@@ -4,16 +4,12 @@ using UnityEngine;
 namespace Misaki.GraphView
 {
     [Serializable]
-    public class RelayNode : DataNode, ISlotContainer, IExecutable
+    public class RelayNode : DataNode, ISlotContainer
     {
         [SerializeField]
-        private Slot _inputSlot;
+        private ProxySlot _inputSlot;
         [SerializeField]
-        private Slot _outputSlot;
-
-        private bool _isExecuted;
-
-        public bool IsExecuted => _isExecuted;
+        private ProxySlot _outputSlot;
 
         public string portValueType;
 
@@ -21,7 +17,7 @@ namespace Misaki.GraphView
         {
             base.Initialize(graph);
 
-            _inputSlot = new Slot(this, new SlotData
+            _inputSlot = new(this, new SlotData
             {
                 slotName = "Input",
                 nodeID = Id,
@@ -29,8 +25,7 @@ namespace Misaki.GraphView
                 direction = SlotDirection.Input,
                 valueType = typeof(object).FullName
             });
-
-            _outputSlot = new Slot(this, new SlotData
+            _outputSlot = new(this, new SlotData
             {
                 slotName = "Output",
                 nodeID = Id,
@@ -42,22 +37,39 @@ namespace Misaki.GraphView
             portValueType = typeof(object).FullName;
         }
 
-        ///// <summary>
-        ///// Bind the slot to the relay node.
-        ///// </summary>
-        ///// <param name="slot"> <see cref="ISlot"/> The slot want to bind to current relay node </param>
-        //public void BindSlot(ISlot slot)
-        //{
-        //    switch (slot.SlotData.direction)
-        //    {
-        //        case SlotDirection.Input:
-        //            _inputSlot.Bind(slot);
-        //            break;
-        //        case SlotDirection.Output:
-        //            _outputSlot.Bind(slot);
-        //            break;
-        //    }
-        //}
+        /// <summary>
+        /// Bind the slot to the relay node.
+        /// </summary>
+        /// <param name="slot"> <see cref="ISlot"/> The slot want to bind to current relay node </param>
+        public void BindSlot(ISlot slot)
+        {
+            switch (slot.SlotData.direction)
+            {
+                case SlotDirection.Input:
+                    _inputSlot.Bind(slot);
+                    break;
+                case SlotDirection.Output:
+                    _outputSlot.Bind(slot);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Unbind the slot from the relay node.
+        /// </summary>
+        /// <param name="direction"> The direction of the slot </param>
+        public void UnbindSlot(SlotDirection direction)
+        {
+            switch (direction)
+            {
+                case SlotDirection.Input:
+                    _inputSlot.Unbind();
+                    break;
+                case SlotDirection.Output:
+                    _outputSlot.Unbind();
+                    break;
+            }
+        }
 
         public ISlot GetSlot(int index, SlotDirection direction)
         {
@@ -75,23 +87,12 @@ namespace Misaki.GraphView
             _outputSlot.UnlinkAll();
         }
 
-        public void Execute()
+        public override void Dispose()
         {
-            if (_isExecuted)
-            {
-                return;
-            }
+            base.Dispose();
 
-            _inputSlot.PullData(null);
-            _outputSlot.ReceiveData(_inputSlot.Data);
-            _outputSlot.PushData(null);
-
-            _isExecuted = true;
-        }
-
-        public void ClearExecutionFlag()
-        {
-            _isExecuted = false;
+            _inputSlot.Unbind();
+            _outputSlot.Unbind();
         }
     }
 }

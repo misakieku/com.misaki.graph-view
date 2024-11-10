@@ -17,6 +17,8 @@ namespace Misaki.GraphView
         private List<SlotConnection> _connections = new();
         [SerializeReference]
         private List<ExposedProperty> _exposedProperties = new();
+        [SerializeField]
+        private List<NodeGroupData> nodeGroupDatas = new();
 
         private readonly Dictionary<string, DataNode> _nodeMap = new();
 
@@ -24,6 +26,7 @@ namespace Misaki.GraphView
         public ReadOnlyCollection<StickyNoteData> StickyNotes => _stickyNotes.AsReadOnly();
         public ReadOnlyCollection<SlotConnection> Connections => _connections.AsReadOnly();
         public ReadOnlyCollection<ExposedProperty> ExposedProperties => _exposedProperties.AsReadOnly();
+        public ReadOnlyCollection<NodeGroupData> NodeGroupDatas => nodeGroupDatas.AsReadOnly();
 
         public Vector3 graphPosition;
         public Vector3 graphScale = Vector3.one;
