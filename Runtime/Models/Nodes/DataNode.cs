@@ -7,29 +7,37 @@ namespace Misaki.GraphView
     public abstract class DataNode
     {
         [SerializeField]
-        protected GraphObject graphObject;
+        private GraphObject _graphObject;
         [SerializeField]
-        protected string id = Guid.NewGuid().ToString();
+        private string _id = Guid.NewGuid().ToString();
 
-        public Rect position;
+        public Rect nodePosition;
 
-        public GraphObject GraphObject => graphObject;
-        public string Id => id;
+        public GraphObject GraphObject => _graphObject;
+        public string Id => _id;
 
         /// <summary>
         /// Initialize the node with the graph object, this method is called when the node is added to the graph.
         /// </summary>
         public virtual void Initialize(GraphObject graph)
         {
-            graphObject = graph;
+            _graphObject = graph;
         }
 
         /// <summary>
-        /// Dispose the node, this method is called when the node is removed from the graph.
+        /// Dispose the node, this method is called when editor window is closed or the node is removed from the graph.
         /// </summary>
         public virtual void Dispose()
         {
-            graphObject = null;
+        }
+
+        /// <summary>
+        /// Destroy the node, this method is called when the node is removed from the graph.
+        /// </summary>
+        public virtual void Destroy()
+        {
+            Dispose();
+            _graphObject = null;
         }
     }
 }

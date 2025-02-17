@@ -3,13 +3,22 @@
 namespace Misaki.GraphView
 {
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
-    public class NodeInputAttribute : System.Attribute
+    public class NodeInputAttribute : Attribute
     {
-        public string Name { get; }
+        public string Name
+        {
+            get;
+        }
 
-        public NodeInputAttribute(string name = null)
+        public object DefaultValue
+        {
+            get;
+        }
+
+        public NodeInputAttribute(string name = null, object defaultValue = null)
         {
             Name = name;
+            DefaultValue = defaultValue;
         }
     }
 }

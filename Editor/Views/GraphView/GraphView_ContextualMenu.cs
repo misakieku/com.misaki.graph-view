@@ -34,7 +34,7 @@ namespace Misaki.GraphView.Editor
                 {
                     var relayNode = new RelayNode
                     {
-                        position = new Rect(mousePosition, Vector2.zero)
+                        nodePosition = new Rect(mousePosition, Vector2.zero)
                     };
 
                     AddRelayNode(relayNode, edge);

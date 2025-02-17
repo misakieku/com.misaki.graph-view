@@ -10,7 +10,8 @@ namespace Misaki.GraphView
     {
         [SerializeField]
         private SlotData _slotData;
-        [FormerlySerializedAs("_linkedSlotDatas")] [SerializeField]
+        [FormerlySerializedAs("_linkedSlotDatas")]
+        [SerializeField]
         private List<SlotData> _linkedSlotData = new();
         [SerializeReference]
         private DataNode _owner;
@@ -113,7 +114,7 @@ namespace Misaki.GraphView
         }
 
         /// <inheritdoc/>
-        public void ReceiveData(object data)
+        public virtual void ReceiveData(object data)
         {
             _data = data;
         }

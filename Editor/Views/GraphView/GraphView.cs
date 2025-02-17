@@ -64,14 +64,12 @@ namespace Misaki.GraphView.Editor
             this.AddManipulator(new RectangleSelector());
             this.AddManipulator(new ClickSelector());
 
-            var zoomConfig = _graphViewConfig.zoomConfig;
-            var zoomer = new ContentZoomer();
-            if (zoomConfig != null)
+            var zoomer = new ContentZoomer
             {
-                zoomer.minScale = zoomConfig.minScale;
-                zoomer.maxScale = zoomConfig.maxScale;
-                zoomer.scaleStep = zoomConfig.scaleStep;
-            }
+                minScale = _graphViewConfig.zoomConfig.minScale,
+                maxScale = _graphViewConfig.zoomConfig.maxScale,
+                scaleStep = _graphViewConfig.zoomConfig.scaleStep
+            };
             this.AddManipulator(zoomer);
 
             InitializeAssetElements();
@@ -120,8 +118,8 @@ namespace Misaki.GraphView.Editor
                 }
 
                 if (startPort.portType != port.portType &&
-                    _graphObject.ValueConverterManager != null &&
-                    !_graphObject.ValueConverterManager.CanConvert(startPort.portType, port.portType))
+                    (_graphObject.ValueConverterManager == null ||
+                    !_graphObject.ValueConverterManager.CanConvert(startPort.portType, port.portType)))
                 {
                     continue;
                 }
@@ -153,7 +151,7 @@ namespace Misaki.GraphView.Editor
 
                     var baseNode = new PropertyInput(property)
                     {
-                        position = new Rect(position, Vector2.zero)
+                        nodePosition = new Rect(position, Vector2.zero)
                     };
                     AddNode(baseNode);
                 }

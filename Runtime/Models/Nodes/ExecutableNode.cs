@@ -20,6 +20,7 @@ namespace Misaki.GraphView
         public ReadOnlyCollection<ISlot> Outputs => _outputs.AsReadOnly();
 
         public bool IsExecuted => _isExecuted;
+        public ILogger Logger => GraphObject.Logger;
 
         public Action OnExecutionStarted;
         public Action OnExecutionCompleted;
@@ -44,30 +45,16 @@ namespace Misaki.GraphView
                 var inputAttribute = field.GetCustomAttribute<NodeInputAttribute>();
                 if (inputAttribute != null)
                 {
-                    var inputSlot = new Slot(this, new SlotData
-                    {
-                        slotName = field.Name,
-                        nodeID = Id,
-                        slotIndex = inputSlotIndex++,
-                        direction = SlotDirection.Input,
-                        valueType = field.FieldType.FullName
-                    });
+                    var inputSlot = new Slot(this,
+                        new SlotData(field.Name, Id, inputSlotIndex++, SlotDirection.Input, field.FieldType));
                     _inputs.Add(inputSlot);
-
-                    continue;
                 }
 
                 var outputAttribute = field.GetCustomAttribute<NodeOutputAttribute>();
                 if (outputAttribute != null)
                 {
-                    var outputSlot = new Slot(this, new SlotData
-                    {
-                        slotName = field.Name,
-                        nodeID = Id,
-                        slotIndex = outputSlotIndex++,
-                        direction = SlotDirection.Output,
-                        valueType = field.FieldType.FullName
-                    });
+                    var outputSlot = new Slot(this,
+                        new SlotData(field.Name, Id, outputSlotIndex++, SlotDirection.Output, field.FieldType));
                     _outputs.Add(outputSlot);
                 }
             }
@@ -90,13 +77,13 @@ namespace Misaki.GraphView
             foreach (var input in Inputs)
             {
                 input.UnlinkAll();
-                graphObject.RemoveAllConnectionsForSlot(input);
+                GraphObject.RemoveAllConnectionsForSlot(input);
             }
 
             foreach (var output in Outputs)
             {
                 output.UnlinkAll();
-                graphObject.RemoveAllConnectionsForSlot(output);
+                GraphObject.RemoveAllConnectionsForSlot(output);
             }
         }
 
@@ -108,17 +95,19 @@ namespace Misaki.GraphView
                 return;
             }
 
+            OnPreExecute();
+
             OnExecutionStarted?.Invoke();
             Inputs.PullData(OnPullData);
 
-            if (!graphObject.GraphProcessor.IsRunning)
+            if (!GraphObject.GraphProcessor.IsRunning)
             {
                 return;
             }
 
             if (!OnExecute())
             {
-                graphObject.GraphProcessor.Break();
+                GraphObject.GraphProcessor.Break();
                 OnExecutionFailed?.Invoke();
                 return;
             }
@@ -141,6 +130,10 @@ namespace Misaki.GraphView
         }
 
         protected virtual void OnPushData(ISlot output)
+        {
+        }
+
+        protected virtual void OnPreExecute()
         {
         }
 

@@ -27,7 +27,7 @@ namespace Misaki.GraphView.Editor
                 return;
             }
 
-            nodeView.SetPosition(node.position);
+            nodeView.SetPosition(node.nodePosition);
 
             if (nodeView is IInspectable inspectable)
             {
@@ -203,7 +203,7 @@ namespace Misaki.GraphView.Editor
         private void AddRelayNodeView(RelayNode relayNode, Edge edge)
         {
             var relayNodeView = new RelayNodeView(relayNode, _graphViewConfig.portColorManager);
-            relayNodeView.SetPosition(relayNode.position);
+            relayNodeView.SetPosition(relayNode.nodePosition);
 
             relayNodeView.Connect(edge,
                 out var inputConnection, out var outputConnection,

@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 
 namespace Misaki.GraphView
 {
-    public abstract class GraphObject : ScriptableObject
+    public abstract class GraphObject : ScriptableObject, IDisposable
     {
         [SerializeReference]
         private List<DataNode> _nodes = new();
@@ -61,7 +61,7 @@ namespace Misaki.GraphView
                 slotContainer.UnlinkAllSlots();
             }
 
-            node.Dispose();
+            node.Destroy();
         }
 
         public bool TryAddNodeToMap(DataNode node)
@@ -149,6 +149,14 @@ namespace Misaki.GraphView
 
             GraphProcessor.UpdateComputeOrder();
             GraphProcessor.Execute(Nodes);
+        }
+
+        public virtual void Dispose()
+        {
+            foreach (var node in _nodes)
+            {
+                node.Dispose();
+            }
         }
     }
 }

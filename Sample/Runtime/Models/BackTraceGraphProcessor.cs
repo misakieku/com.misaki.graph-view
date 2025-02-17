@@ -1,14 +1,13 @@
 ﻿using System.Collections.ObjectModel;
-using UnityEngine;
 
 namespace Misaki.GraphView.Sample
 {
     public class BackTraceGraphProcessor : IGraphProcessor
     {
         private bool _isRunning;
-        
+
         public bool IsRunning => _isRunning;
-        
+
         public void UpdateComputeOrder()
         {
         }
@@ -17,9 +16,14 @@ namespace Misaki.GraphView.Sample
         {
             _isRunning = true;
             nodes.ClearAllExecuteFlag();
-            
+
             foreach (var node in nodes)
             {
+                if (!_isRunning)
+                {
+                    break;
+                }
+
                 if (node is Output outputNode)
                 {
                     outputNode.Execute();

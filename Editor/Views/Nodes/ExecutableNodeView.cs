@@ -52,6 +52,7 @@ namespace Misaki.GraphView.Editor
 
             name = _nodeInfo.Name ?? _nodeType.Name;
             title = _nodeInfo.Name ?? _nodeType.Name;
+            style.minWidth = 104.0f;
 
             // Add the category as a class to the node so that we can style the node based on the category
             var depths = _nodeInfo.Category.Split('/').ToList();
@@ -70,6 +71,7 @@ namespace Misaki.GraphView.Editor
                 if (inputSlots == null || inputSlots.Count == 0)
                 {
                     inputContainer.style.display = DisplayStyle.None;
+                    this.Query<VisualElement>("divider", "vertical").AtIndex(0).style.display = DisplayStyle.None;
                 }
                 else
                 {
@@ -88,6 +90,7 @@ namespace Misaki.GraphView.Editor
                 if (outputSlots == null || outputSlots.Count == 0)
                 {
                     outputContainer.style.display = DisplayStyle.None;
+                    this.Query<VisualElement>("divider", "vertical").AtIndex(0).style.display = DisplayStyle.None;
                 }
                 else
                 {
@@ -170,6 +173,7 @@ namespace Misaki.GraphView.Editor
 
             inputPort.portName = ObjectNames.NicifyVariableName(slot.SlotData.slotName);
             inputPort.portType = valueType;
+            inputPort.tooltip = valueType.FullName;
             inputPort.userData = slot;
             if (_portColorManager != null && _portColorManager.TryGetColor(valueType, out var portColor))
             {
@@ -186,6 +190,7 @@ namespace Misaki.GraphView.Editor
             var outputPort = Port.Create<Edge>(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, valueType);
 
             outputPort.portName = ObjectNames.NicifyVariableName(slot.SlotData.slotName);
+            outputPort.tooltip = valueType.FullName;
             outputPort.portType = valueType;
             outputPort.userData = slot;
             if (_portColorManager != null && _portColorManager.TryGetColor(valueType, out var portColor))
@@ -232,7 +237,7 @@ namespace Misaki.GraphView.Editor
             }
 
             // Use reflection to get the inspector input fields
-            var fields = _nodeType.GetFields().Where(f => f.GetCustomAttribute<InspectorInputAttribute>() != null).ToArray();
+            var fields = _nodeType.GetFields(ConstResource.NODE_FIELD_BINDING_FLAGS).Where(f => Attribute.IsDefined(f, typeof(InspectorInputAttribute))).ToArray();
 
             if (fields.Length == 0)
             {
@@ -253,16 +258,17 @@ namespace Misaki.GraphView.Editor
                     continue;
                 }
 
-                if (field.GetCustomAttribute<NodeOutputAttribute>() is not null)
-                {
-                    continue;
-                }
+                var inspectorInputAttribute = field.GetCustomAttribute<InspectorInputAttribute>();
+                var propertyName = inspectorInputAttribute.Name ?? ObjectNames.NicifyVariableName(field.Name);
+                var connectionBinding = inspectorInputAttribute.ConnectionBinding;
 
-                var propertyName = field.GetCustomAttribute<InspectorInputAttribute>().Name ?? ObjectNames.NicifyVariableName(field.Name);
+                var connectionField = string.IsNullOrEmpty(connectionBinding) ?
+                    field
+                    : _nodeType.GetFields(ConstResource.NODE_FIELD_BINDING_FLAGS).FirstOrDefault(f => f.Name == connectionBinding);
 
-                if (field.GetCustomAttribute<NodeInputAttribute>() is not null)
+                if (connectionField != null)
                 {
-                    if (_dataNode.Inputs.FirstOrDefault(x => x.SlotData.slotName == field.Name) is { } inputSlot)
+                    if (_dataNode.Inputs.FirstOrDefault(x => x.SlotData.slotName == connectionField.Name) is { } inputSlot)
                     {
                         if (inputSlot.LinkedSlotData.Count > 0)
                         {

@@ -17,24 +17,10 @@ namespace Misaki.GraphView
         {
             base.Initialize(graph);
 
-            _inputSlot = new(this, new SlotData
-            {
-                slotName = "Input",
-                nodeID = Id,
-                slotIndex = 0,
-                direction = SlotDirection.Input,
-                valueType = typeof(object).FullName
-            });
-            _outputSlot = new(this, new SlotData
-            {
-                slotName = "Output",
-                nodeID = Id,
-                slotIndex = 0,
-                direction = SlotDirection.Output,
-                valueType = typeof(object).FullName
-            });
-
-            portValueType = typeof(object).FullName;
+            _inputSlot = new(this,
+                new SlotData("Input", Id, 0, SlotDirection.Input, typeof(object)));
+            _outputSlot = new(this,
+                new SlotData("Output", Id, 0, SlotDirection.Output, typeof(object)));
         }
 
         /// <summary>

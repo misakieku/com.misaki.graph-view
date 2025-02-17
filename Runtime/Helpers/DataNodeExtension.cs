@@ -12,6 +12,8 @@ namespace Misaki.GraphView
                 {
                     executable.ClearExecutionFlag();
                 }
+
+                node.Dispose();
             }
         }
     }

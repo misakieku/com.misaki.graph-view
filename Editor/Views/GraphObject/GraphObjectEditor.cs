@@ -37,7 +37,7 @@ namespace Misaki.GraphView.Editor
                 }
 
                 var showInInspectorValue = showInInspectorField.GetValue(property);
-                if (showInInspectorValue is not bool or bool and false)
+                if (showInInspectorValue is not bool or false)
                 {
                     continue;
                 }

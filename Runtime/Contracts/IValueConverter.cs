@@ -1,8 +1,8 @@
 ﻿namespace Misaki.GraphView
 {
-    public interface IValueConverter<TSource, TTarget>
+    public interface IValueConverter
     {
-        public TTarget ConvertTo(TSource source);
-        public TSource ConvertBack(TTarget target);
+        public object ConvertTo(object source);
+        public object ConvertBack(object target);
     }
 }

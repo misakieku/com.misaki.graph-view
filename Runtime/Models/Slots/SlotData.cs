@@ -11,6 +11,15 @@ namespace Misaki.GraphView
         public SlotDirection direction;
         public string valueType;
 
+        public SlotData(string name, string id, int index, SlotDirection slotDirection, Type type)
+        {
+            slotName = name;
+            nodeID = id;
+            slotIndex = index;
+            direction = slotDirection;
+            valueType = type.AssemblyQualifiedName;
+        }
+
         public bool Equals(SlotData other)
         {
             return slotName == other.slotName && nodeID == other.nodeID && slotIndex == other.slotIndex && direction == other.direction && valueType == other.valueType;

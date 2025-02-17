@@ -40,7 +40,7 @@ namespace Misaki.GraphView.Editor
             inputContainer.Add(_inputPort);
             outputContainer.Add(_outputPort);
 
-            var portType = Type.GetType(_dataNode.portValueType) ?? typeof(object);
+            var portType = Type.GetType(_dataNode.portValueType ?? typeof(object).FullName);
             SetPortsTypeAndColor(portType);
         }
 
@@ -73,6 +73,7 @@ namespace Misaki.GraphView.Editor
                 outputEdge = _outputPort.ConnectTo(input);
 
                 SetPortsTypeAndColor(input.portType);
+                _dataNode.portValueType = input.portType.AssemblyQualifiedName;
             }
         }
 
@@ -121,8 +122,6 @@ namespace Misaki.GraphView.Editor
                     _outputPort.portColor = portColor;
                 }
             }
-
-            _dataNode.portValueType = portType.FullName;
         }
 
         public Port GetPort(int index, Direction direction)

@@ -54,8 +54,8 @@ namespace Misaki.GraphView.Editor
             _searchContextElements.Clear();
 
             var types = string.IsNullOrEmpty(_owner.GraphViewConfig.searchNamespace) ?
-                TypeCache.GetTypesDerivedFrom<ExecutableNode>().ToArray() :
-                TypeCache.GetTypesDerivedFrom<ExecutableNode>().Where(t => !string.IsNullOrEmpty(t.Namespace) && t.Namespace.StartsWith(_owner.GraphViewConfig.searchNamespace)).ToArray();
+                TypeCache.GetTypesDerivedFrom<ExecutableNode>() :
+                TypeCache.GetTypesDerivedFrom<ExecutableNode>().Where(t => !string.IsNullOrEmpty(t.Namespace) && t.Namespace.StartsWith(_owner.GraphViewConfig.searchNamespace));
 
             foreach (var type in types)
             {
@@ -68,7 +68,6 @@ namespace Misaki.GraphView.Editor
                     if (!string.IsNullOrEmpty(nodeInfo.Category))
                     {
                         var title = $"{nodeInfo.Category}/{nodeInfo.Name}";
-                        // We only want to show the node that has the NodeInfoAttribute so that there is no need to create an instance of the node right now
                         _searchContextElements.Add(new SearchContextElement(type, title));
                     }
                 }
@@ -107,25 +106,14 @@ namespace Misaki.GraphView.Editor
             foreach (var element in _searchContextElements)
             {
                 var entryTitle = element.Title.Split('/');
-                var lastGroup = tree.FindLast(e => e is SearchTreeGroupEntry && e.name == entryTitle[0]);
-                if (lastGroup == null)
-                {
-                    lastGroup = new SearchTreeGroupEntry(new GUIContent(entryTitle[0]), 1);
-                    tree.Add(lastGroup);
-                }
-
-                var groupName = string.Empty;
                 for (var i = 0; i < entryTitle.Length - 1; i++)
                 {
-                    groupName += entryTitle[i];
-                    var group = tree.FindLast(e => e is SearchTreeGroupEntry && e.name == groupName);
+                    var group = tree.FindLast(e => e is SearchTreeGroupEntry && e.name == entryTitle[i] && e.level == i + 1);
                     if (group == null)
                     {
                         group = new SearchTreeGroupEntry(new GUIContent(entryTitle[i]), i + 1);
                         tree.Add(group);
                     }
-
-                    groupName += "/";
                 }
 
                 var entry = new SearchTreeEntry(new GUIContent(entryTitle[^1]))
@@ -163,7 +151,7 @@ namespace Misaki.GraphView.Editor
                 return false;
             }
 
-            node.position = new Rect(graphMousePosition, Vector2.zero);
+            node.nodePosition = new Rect(graphMousePosition, Vector2.zero);
             _owner.AddNode(node);
             _owner.GraphViewConfig.serializedObject.Update();
 

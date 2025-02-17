@@ -55,7 +55,7 @@ namespace Misaki.GraphView.Editor
                 {
                     if (element is IDataNodeView dataNodeView)
                     {
-                        dataNodeView.GetDataNode().position = element.GetPosition();
+                        dataNodeView.GetDataNode().nodePosition = element.GetPosition();
                     }
                 }
             }

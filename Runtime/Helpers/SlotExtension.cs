@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Misaki.GraphView
 {
@@ -29,6 +30,7 @@ namespace Misaki.GraphView
         /// </summary>
         /// <param name="slotData">The slot data to get the value type from.</param>
         /// <returns><see cref="Type"/> The type of the slot value.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Type GetValueType(this SlotData slotData)
         {
             return Type.GetType(slotData.valueType);
@@ -39,6 +41,7 @@ namespace Misaki.GraphView
         /// </summary>
         /// <param name="slots">The collection of slots to pull data from.</param>
         /// <param name="OnPullData">The action to execute when pulling data.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void PullData(this IEnumerable<ISlot> slots, Action<ISlot> OnPullData)
         {
             foreach (var slot in slots)
@@ -52,6 +55,7 @@ namespace Misaki.GraphView
         /// </summary>
         /// <param name="slots">The collection of slots to push data to.</param>
         /// <param name="OnPushData">The action to execute when pushing data.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void PushData(this IEnumerable<ISlot> slots, Action<ISlot> OnPushData)
         {
             foreach (var slot in slots)
